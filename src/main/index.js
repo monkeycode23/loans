@@ -1,37 +1,18 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow,ipcMain } = require('electron');
 const path = require('path');
-const { testDatabase } = require('./storage/database');
-const {autoUpdater} = require('electron-updater');
 const logger = require('./logger.js');
+const {checkForUpdates} = require('./updater');
+const dotenv = require('dotenv');
 
-function checkForUpdates() {
-  // Solo ejecutar el actualizador si la app está empaquetada
-  if (!app.isPackaged) {
-    logger.info('Saltando verificación de actualizaciones en modo desarrollo');
-    return;
-  }
+dotenv.config();
 
-  try {
-    autoUpdater.logger = logger;
-    autoUpdater.checkForUpdatesAndNotify();
-
-    autoUpdater.on('update-available', (info) => {
-      logger.info('Actualización disponible:', info);
-    });
-
-    autoUpdater.on('update-downloaded', (info) => {
-      logger.info('Actualización descargada:', info);
-    });
-
-    autoUpdater.on('error', (err) => {
-      logger.error('Error en actualización:', err);
-    });
-  } catch (error) {
-    logger.error('Error al inicializar el actualizador:', error);
-  }
-}
+ipcMain.on('check-for-updates', () => {
+  checkForUpdates();
+}); 
 
 
+const DatabaseIpcMain = require('./ipcs/database/ipcmain');
+ipcMain.handle('database', DatabaseIpcMain);
 
 let mainWindow;
   
@@ -41,8 +22,9 @@ function createWindow() {
     width: 1024,
     height: 768,
     webPreferences: {
+      preload: path.join(__dirname, 'preload/index.js'), // Cargar el archivo de preload
       nodeIntegration: true,
-      contextIsolation: false, // Esto debería ser true en producción
+      contextIsolation: true, // Esto debería ser true en producción
       webSecurity: true, // Activar en producción por seguridad
       nodeIntegrationInWorker: true,
       enableRemoteModule: true // Deprecado en versiones nuevas de Electron
@@ -63,7 +45,7 @@ function createWindow() {
   }
  
   // Test de base de datos
-  testDatabase();
+ 
 
   // Emitido cuando la ventana es cerrada
   mainWindow.on('closed', () => {
