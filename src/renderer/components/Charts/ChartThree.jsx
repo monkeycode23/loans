@@ -1,8 +1,6 @@
 import React, {useEffect, useState } from 'react';
 import ReactApexChart from 'react-apexcharts';
-import paymentsModel from '../../database/models/Payments';
 import { getMonthStartEnd } from '../../common/funcs';
-import { useDash } from '../../pages/Dashboard/context/DashContext';
 
 const options = {
   chart: {
@@ -51,22 +49,22 @@ const options = {
 const ChartThree= ({payments}) => {
 
    const [stateWeekPayments,setStateWeekPayments] = useState({
-      payed:0,
-      expired:0,
-      pending:0,
-      incomplete:0,
+      payed:5,
+      expired:5,
+      pending:10,
+      incomplete:1,
      })
     //const {stateWeekPayments,setStateWeekPayments} = useDash()
   
   
     const [state, setState] = useState({
     series: [
-      0,0,0,0
+      12,4,12,22
          
     ],
   });
 
-  async function  getPaymentsData(period){
+/*   async function  getPaymentsData(period){
 
     console.log(period)
     const d = new Date()
@@ -93,11 +91,11 @@ const ChartThree= ({payments}) => {
         p.incomplete
       ]
     
-  }
+  } */
 
   useEffect(() => {
 
-   const init = async (params) => {
+  /*  const init = async (params) => {
 
     const sPayments = await paymentsModel.getPaymentsWeekState()
       
@@ -135,7 +133,7 @@ const ChartThree= ({payments}) => {
    }
 
     
-    init()
+    init() */
     
 
    

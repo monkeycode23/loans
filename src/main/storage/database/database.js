@@ -13,7 +13,7 @@ class DatabaseManager {
  
     this.dbPath = process.env.NODE_ENV === "development"
     ? './'
-    : path.join(process.resourcesPath, this.dbName);
+    : process.resourcesPath;
 
     console.log("dbPath:----------------------------->",process.env.NODE_ENV);
     this.connect()
@@ -63,6 +63,7 @@ class DatabaseManager {
       logger.info(`Datos insertados en la tabla ${tableName}`);
 
       const id = this.db.prepare(query).lastInsertRowId;
+      
       return {
         id,
         ...data
@@ -75,13 +76,16 @@ class DatabaseManager {
 
   asyncQuery(sql, params = []) {
     try {
-      const stmt = this.db.prepare(sql);
 
       return new Promise((resolve, reject) => {
-        stmt.all(params, (err, rows) => {
-          if (err) reject(err);
-          else resolve(rows);
-        });
+        try {
+          const stmt = this.db.prepare(sql);
+          const result = stmt.all(params); // Ejecutar la consulta de forma sincrónica
+          resolve(result); // Resolver la promesa con el resultado
+        } catch (error) {
+          logger.error("Error al ejecutar la consulta:", error);
+          reject(error); // Rechazar la promesa en caso de error
+        }
       });
     } catch (error) {
       logger.error("Error al ejecutar la consulta:", error);

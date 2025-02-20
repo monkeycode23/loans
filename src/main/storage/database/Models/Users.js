@@ -18,7 +18,8 @@ class Users {
   async getUser(filter) {
     const query = `SELECT * FROM ${this.tableName} WHERE ${Object.keys(filter)[0]} = ?`;
     const params = [Object.values(filter)[0]];
-    
+    console.log("query  parmas",query,params)
+    console.log(filter)
     return await this.db.asyncQuery(query, params);
   }
 

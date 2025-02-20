@@ -1,7 +1,6 @@
 //import { ApexOptions } from 'apexcharts';
 import React, { useEffect, useState } from 'react';
 import ReactApexChart from 'react-apexcharts';
-import paymentsModel from '../../database/models/Payments';
 const options = {
   legend: {
     show: false,
@@ -123,7 +122,7 @@ const ChartOne = () => {
     series: [
       {
         name: 'Ganancia Neta',
-        data: [1233333, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        data: [123, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
       },
 
       {

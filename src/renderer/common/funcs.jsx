@@ -131,6 +131,54 @@ export  function formatDateDifference(date) {
 
 
   
+
+export function generateToken(obj, expirationDate) {
+  // Convertir el objeto a una cadena JSON
+  const date = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 días a partir de ahora
+
+  const  tokenObject ={
+    ...obj,
+    expirationDate:date.getTime()
+  }
+  const jsonString = JSON.stringify(tokenObject);
+  
+
+  const base64Encoded = btoa(jsonString);
+  
+  return base64Encoded;
+}
+
+
+export function decodeToken(token) {
+  // Decodificar el token de Base64
+  const decodedData = atob(token);
+
+  // Convertir la cadena JSON de nuevo a un objeto
+  const obj = JSON.parse(decodedData);
+ 
+  return { ...obj };
+}
+
+async function generateHash(message) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(message);
+  const hash = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function compareHash(message, hashToCompare) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(message);
+  const hash = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hash));
+  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  return hashHex === hashToCompare;
+}
+
+
+
+
+  
     // Formatear las fechas como 'YYYY-MM-DD'
     const formatDate = (date) => date.toISOString().split('T')[0];
   

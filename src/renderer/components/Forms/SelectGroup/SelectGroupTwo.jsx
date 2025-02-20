@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 
-const SelectGroupTwo: React.FC = () => {
-  const [selectedOption, setSelectedOption] = useState<string>('');
-  const [isOptionSelected, setIsOptionSelected] = useState<boolean>(false);
+const SelectGroupTwo = () => {
+  const [selectedOption, setSelectedOption] = useState('');
+  const [isOptionSelected, setIsOptionSelected] = useState(false);
 
   const changeTextColor = () => {
     setIsOptionSelected(true);

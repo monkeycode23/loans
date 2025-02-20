@@ -10,7 +10,7 @@ import Logo from '../../images/logo/logo.svg';
 import LogoDark from '../../images/logo/logo-dark.svg';
 import { Link } from 'react-router-dom';
 import Person from './ImagSvg';
-import { initFields2, validateRules2, insertUser, generateToken, validateUserName } from './funcs';
+import { initFields2, validateRules2, insertUser, generateToken, validateUserName, validateUserEmail, decodeToken  } from './funcs';
 import { Eye, EyeOff } from '../../components/Icons';
 
 const SignUp = () => {
@@ -48,18 +48,11 @@ const SignUp = () => {
       return;
     }
 
-    setField({ type: "validate", field: "password" });
-    setField({ type: "validate", field: "rpassword" });
-
-    const userName = await validateUserName(fields.username);
-
-    /*
-    const userEmail = await validateUserEmail(fields.email);
-
+  
+    const user = await validateUserName(fields.username.value);
+    //console.log("user",user)
     
-
-
-     if (userName) {
+    if (user) {
       setField({
         type: "error",
         field: "username",
@@ -68,7 +61,9 @@ const SignUp = () => {
       return;
     }
 
-    if (!userEmail) {
+    const userEmail = await validateUserEmail(fields.email.value);
+
+    if (userEmail) {
       setField({
         type: "error",
         field: "email",
@@ -77,16 +72,18 @@ const SignUp = () => {
       return;
     }
 
-    setField({ type: "validate", field: "username" });
-    setField({ type: "validate", field: "email" });
     
-    const user = await insertUser(fields);
+    setField({ type: "validate", field: "password" });
+    setField({ type: "validate", field: "rpassword" });
 
-    const token = await generateToken(user);
+    const newUser = await insertUser(fields);
+    console.log(newUser)
+      const token = await generateToken(newUser);
 
-    dispatch(register(user, token));
+  console.log(token)
+    dispatch(register({user:newUser,token:token}));
 
-    navigate("/"); */
+    navigate("/"); 
   };
 
   return (
@@ -120,16 +117,18 @@ const SignUp = () => {
               <form onSubmit={submit} noValidate>
                 <div className="mb-4">
                   <label className="mb-2.5 block font-medium text-black dark:text-white">
-                    Username
+                    Usuario
                   </label>
                   <div className="relative">
                     <input
                      autoComplete="username"
                       type="text"
                       placeholder="Nombre de usuario"
-                      className={`w-full rounded-lg border border-stroke bg-transparent  ${
-                        fields.username.error ? "border-red text-red" : ""
-                      }  py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary`}
+                      className={`w-full rounded-lg border  bg-transparent  ${
+                        fields.username.error ? "border-red text-red" : "border-stroke"
+                      }  py-4 pl-6 pr-10 text-black outline-none
+                       focus:border-primary focus-visible:shadow-none dark:border-form-strokedark
+                       dark:bg-form-input dark:text-white dark:focus:border-primary`}
                       onChange={(e) =>
                         setField({
                           type: "set",
@@ -179,9 +178,11 @@ const SignUp = () => {
                     autoComplete="email"
                       type="email"
                       placeholder="Correo electronico"
-                      className={`w-full rounded-lg border border-stroke bg-transparent  ${
-                        fields.email.error ? "border-red text-red" : ""
-                      }  py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary`}
+                      className={`w-full rounded-lg border  bg-transparent  ${
+                        fields.email.error ? "border-red text-red" : "border-stroke"
+                      }  py-4 pl-6 pr-10 text-black outline-none
+                       focus:border-primary focus-visible:shadow-none dark:border-form-strokedark
+                       dark:bg-form-input dark:text-white dark:focus:border-primary`}
                       onChange={(e) =>
                         setField({
                           type: "set",
@@ -227,9 +228,11 @@ const SignUp = () => {
                     <input
                        type={showPassword ? "text" : "password"}
                       placeholder="Contraseña"
-                      className={`w-full rounded-lg border border-stroke bg-transparent  ${
-                        fields.password.error ? "border-red text-red" : ""
-                      }  py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary`}
+                      className={`w-full rounded-lg border  bg-transparent  ${
+                        fields.password.error ? "border-red text-red" : "border-stroke"
+                      }  py-4 pl-6 pr-10 text-black outline-none
+                       focus:border-primary focus-visible:shadow-none dark:border-form-strokedark
+                       dark:bg-form-input dark:text-white dark:focus:border-primary`}
                       onChange={(e) =>
                         setField({
                           type: "set",
@@ -286,9 +289,11 @@ const SignUp = () => {
                     <input
                        type={showRPassword ? "text" : "password"}
                       placeholder="Re-enter contraseña"
-                      className={`w-full rounded-lg border border-stroke bg-transparent  ${
-                        fields.rpassword.error ? "border-red text-red" : ""
-                      }  py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary`}
+                      className={`w-full rounded-lg border  bg-transparent  ${
+                        fields.rpassword.error ? "border-red text-red" : "border-stroke"
+                      }  py-4 pl-6 pr-10 text-black outline-none
+                       focus:border-primary focus-visible:shadow-none dark:border-form-strokedark
+                       dark:bg-form-input dark:text-white dark:focus:border-primary`}
                       onChange={(e) =>
                         setField({
                           type: "set",
@@ -379,14 +384,14 @@ const SignUp = () => {
                       </defs>
                     </svg>
                   </span>
-                  Sign up with Google
+                  Registrate con  tu cuenta de Google
                 </button>
 
                 <div className="mt-6 text-center">
                   <p>
-                    Already have an account?{" "}
+                    Ya tienes una cuenta?{" "}
                     <Link to="/auth/signin" className="text-primary">
-                      Sign in
+                      Inicia sesión
                     </Link>
                   </p>
                 </div>

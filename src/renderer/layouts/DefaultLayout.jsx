@@ -1,16 +1,21 @@
-import React, { useState, ReactNode } from 'react';
+import React, { useState, useEffect } from 'react';
 import Header from '../components/Header/index.jsx';
+import { Outlet } from 'react-router-dom';
 import Sidebar from '../components/Sidebar/index.jsx';
-
 const DefaultLayout = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
+  useEffect(()=>{
+    setSidebarOpen(true)
+  },[])
+
+ 
   return (
     <div className="dark:bg-boxdark-2 dark:text-bodydark">
       {/* <!-- ===== Page Wrapper Start ===== --> */}
       <div className="flex h-screen overflow-hidden">
         {/* <!-- ===== Sidebar Start ===== --> */}
-        <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
+        <Sidebar sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} /> 
         {/* <!-- ===== Sidebar End ===== --> */}
 
         {/* <!-- ===== Content Area Start ===== --> */}
@@ -22,7 +27,8 @@ const DefaultLayout = ({ children }) => {
           {/* <!-- ===== Main Content Start ===== --> */}
           <main>
             <div className="mx-auto max-w-screen-2xl p-4 md:p-6 2xl:p-10">
-              {children}
+             
+              <Outlet></Outlet>
             </div>
           </main>
           {/* <!-- ===== Main Content End ===== --> */}
@@ -35,3 +41,5 @@ const DefaultLayout = ({ children }) => {
 };
 
 export default DefaultLayout;
+
+

@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import ReactApexChart from 'react-apexcharts';
-import paymentsModel from '../../database/models/Payments';
 
 
 const options = {
@@ -80,7 +79,7 @@ const ChartTwo = ({payments}) => {
     series: [
       {
         name: 'amount',
-        data: [0,0,0, 0, 0, 0,0],
+        data: [2,32,50, 212, 23, 1,0],
       },
       {
         name: 'ganancia',
@@ -91,7 +90,7 @@ const ChartTwo = ({payments}) => {
   
   const [totalAmount, setTotalAmount] = useState(0)
 
-  useEffect(() => {
+ /*  useEffect(() => {
     const init =async ()=>{
      
     
@@ -104,15 +103,15 @@ const ChartTwo = ({payments}) => {
         r.ganancia
       ],
     })
-    
+  
 
   }
 
 
-    init()
+    //init()
   
     return () => {}
-  }, [])
+  }, [])   */
   
 
   async function getData(period){

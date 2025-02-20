@@ -91,6 +91,7 @@ export const initFields = {
     isValid: true,
     error: "",
   },
+ 
   password: {
     value: "",
     isValid: true,
@@ -129,49 +130,87 @@ export const validateRules = {
   },
 };
 
-export async function validateUserName(fields) {
+export async function validateUserName(username) {
   //const user= await window.sqlite.query("SELECT * FROM users WHERE username=?",fields.username.value)
-  const user = await window.database.models.User.getUser({username:fields.username.value}  );
+  
+  const user = await window.database.models.Users.getUser({username:username}  );
 
-  console.log(user)
-  if (user.length == 0) {
-    return false;
+  
+  return user.length>0 ||  user != undefined ? user[0] : false;
+
+ 
+}
+
+export async function validateUserEmail(email) {
+  const user = await window.database.models.Users.getUser({email: email});
+  return user.length>0 ||  user != undefined ? user[0] : false;
+}
+
+
+
+export async function comparePassword(password, hash) {
+  const compare = await compareHash(password, hash)
+  return compare
+}
+
+
+export function generateToken(obj, expirationDate) {
+
+  if(!expirationDate){
+    expirationDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000); // 7 días a partir de ahora
   }
-  return user[0];
-}
 
-export async function validateUserEmail(fields) {
-  const user = await window.database.models.User.getUser({email:fields.email.value});
-  if (user.length == 0) {
-    return false;
+  
+  const  tokenObject ={
+    ...obj,
+    expirationDate:expirationDate.getTime()
   }
-  return user[0];
-}
-export async function generateToken(user) {
-  const token = await window.api.generateToken(user);
-  return token;
-}
+  const jsonString = JSON.stringify(tokenObject);
+  
 
-export async function comparePassword(password, userPassword) {
-  const hash = await window.api.hash(password);
-
-  const compare = await window.api.compare(password, userPassword);
-
-  return hash == userPassword;
+  const base64Encoded = btoa(jsonString);
+  
+  return base64Encoded;
 }
 
 
+export function decodeToken(token) {
+  // Decodificar el token de Base64
+  const decodedData = atob(token);
+
+  // Convertir la cadena JSON de nuevo a un objeto
+  const obj = JSON.parse(decodedData);
+ 
+  return { ...obj };
+}
+
+async function generateHash(message) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(message);
+  const hash = await crypto.subtle.digest('SHA-256', data);
+  return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+
+async function compareHash(message, hashToCompare) {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(message);
+  const hash = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hash));
+  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  return hashHex === hashToCompare;
+}
 
 export async function insertUser(data){
     
-    const hash =await window.api.hash(data.password)
-       
-  const user = await window.database.models.User.createUser({
-    username:data.username,
-    email:data.email,
+    const hash =await generateHash(data.password.value)
+   // console.log("hash",hash)
+   // console.log("compareHash",await compareHash("asdasdasd",hash))
+  const user = await window.database.models.Users.createUser({
+    username:data.username.value,
+    email:data.email.value,
     password:hash,
-    rol:"admin"
-  });
+   // rol:"admin"
+  }); 
 
   if(user)return user;
   return false;
