@@ -19,6 +19,18 @@ class DatabaseManager {
     this.connect()
   }
  
+
+  createDatabaseFile(){
+    const fullPath = path.join(this.dbPath, this.dbName);
+      //throw new Error("Archivo de base de datos no encontrado");
+      fs.writeFileSync(fullPath, '', { flag: 'wx' }); // Crea el archivo vacío
+      logger.info("Archivo de base de datos creado en:", fullPath);
+      
+  }
+   
+
+  
+
   connect() {
     try {
       
@@ -29,7 +41,9 @@ class DatabaseManager {
       // Verificar si el archivo existe
       if (!fs.existsSync(fullPath)) {
         logger.error("No se encuentra el archivo de base de datos en:", fullPath);
-        throw new Error("Archivo de base de datos no encontrado");
+        
+        this.createDatabaseFile()
+        //throw new Error("Archivo de base de datos no encontrado");
       }
       this.db = new Database(fullPath);
       logger.info("Database connected");
@@ -51,25 +65,13 @@ class DatabaseManager {
     }
   }
 
-  insert(tableName, data) {  
-    
-    console.log("data:----------------------------->",data);
+
+  runQuery(sql, params = []) {
     try {
-      const query = `INSERT INTO ${tableName} (${Object.keys(data).join(',')}) VALUES (${Object.values(data).map(value => '?').join(',')})`;
-      const params = Object.values(data);
-
-      console.log("query:----------------------------->",query);
-      this.db.prepare(query).run(Object.values(data));
-      logger.info(`Datos insertados en la tabla ${tableName}`);
-
-      const id = this.db.prepare(query).lastInsertRowId;
+      return this.db.prepare(sql).run(params);
       
-      return {
-        id,
-        ...data
-      }
     } catch (error) {
-      logger.error("Error al insertar datos en la tabla:", error);
+      logger.error("Error al ejecutar la consulta:", error);
       throw error;
     }
   }
@@ -102,10 +104,19 @@ class DatabaseManager {
     });
   }
 
-  query(sql, params = []) {
+  query(sql, params = [],options={type:"all"}) {
     try {
       const stmt = this.db.prepare(sql);
-      return stmt.all(params);
+
+      if(options.type == "all"){
+        return stmt.all(params);
+      }
+      else if(options.type == "one"){
+        return stmt.get(params);
+      }
+      else{
+        return stmt.run(params);
+      }
     } catch (error) {
       logger.error("Error al ejecutar la consulta:", error);
       throw error;

@@ -9,9 +9,7 @@ const Breadcrumb = ({ pageName }) => {
   return (
     <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
      
-      <h2 className="text-title-md2 font-semibold text-black dark:text-white">
-       <button onClick={()=>navigate(-1)}> atras </button>   <button onClick={()=>navigate(+1)}>Sig</button> 
-      </h2>
+
 
       <nav>
         <ol className="flex items-center gap-2">

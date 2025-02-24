@@ -21,7 +21,7 @@ const  PrivateRoute = ({ children }) => {
     <>
     
      {children}
-    
+   
     </>
    ) : <Navigate to="/auth/signin" />;
 };

@@ -72,10 +72,10 @@ const SignIn= () => {
 
     const compare = await comparePassword(fields.password.value,user.password)
     
- 
+   
     if(!compare){
         
-        togglErr(false)
+        togglErr(true)
         return 
     }
 
@@ -85,25 +85,14 @@ const SignIn= () => {
 
     const token = await generateToken(user,rememberMe? 
         new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 30 dias
-        : new Date(Date.now() + 2 * 60 * 60 * 1000))
+        : new Date(Date.now() + 2 * 60 * 60 * 1000)) 
     
 
     dispatch(login({user:user,token:token}))
     
      
-    navigate("/dashboard")
-    /* 
-    
-   
-  
-    
-  
-  
-    
-    
-  
-      */
-     
+    //navigate("/dashboard")
+
     }
    
   

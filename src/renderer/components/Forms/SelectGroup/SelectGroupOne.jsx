@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import Modal from '../../Modal/Modal';
-import { useModal } from '../../Modal/Modal';
+import Modal from '../../Modal';
+import { useModal } from '../../Modal';
 
 const SelectGroupOne=({onChange}) => {
   const [selectedOption, setSelectedOption] = useState('');

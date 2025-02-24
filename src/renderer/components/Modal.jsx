@@ -23,7 +23,7 @@ const Modal = ({ buttonLabel, children, title,button=false,level=1 }) => {
        
           
           <div className="fixed inset-0 z-1000 bg-black bg-opacity-50 flex items-center justify-center z-1000">
-            <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-6">
+            <div className="bg-white rounded-lg shadow-lg max-h-screen overflow-auto max-w-lg w-full p-6">
               {/* Cabecera */}
               <div className="flex justify-between items-center border-b pb-3">
                 <h2 className="text-xl font-semibold">{title}</h2>
@@ -36,7 +36,7 @@ const Modal = ({ buttonLabel, children, title,button=false,level=1 }) => {
               </div>
 
               {/* Contenido */}
-              <div className="mt-4">{children}</div>
+              <div className="mt-4 ">{children}</div>
 
               {/* Pie */}
               <div className="mt-6 flex justify-end space-x-3">

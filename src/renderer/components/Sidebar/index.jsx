@@ -60,7 +60,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
       }`}>
       {/* <!-- SIDEBAR HEADER --> */}
       <div className="flex items-center justify-between gap-2 px-6 py-5.5 lg:py-6.5">
-        <NavLink to="/dashboard">
+        <NavLink to="/">
           <img src={Logo} alt="Logo" />
         </NavLink>
 
@@ -142,7 +142,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
               {/* <!-- Menu Item Profile --> */}
               <li>
                 <NavLink
-                  to="/clients"
+                  to="clients"
                   className={`group relative flex items-center gap-2.5 rounded-sm py-2 px-4 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
                     pathname.includes('clients') && 'bg-graydark dark:bg-meta-4'
                   }`}
@@ -222,7 +222,7 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                    {/* <!-- Menu Item Calendar --> */}
                    <li>
                 <NavLink
-                  to="/cobranza"
+                  to="/payments"
                   className={`group relative flex items-center gap-2.5 rounded-sm py-2 px-4 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
                     pathname.includes('cobranza') &&
                     'bg-graydark dark:bg-meta-4'
@@ -293,7 +293,25 @@ const Sidebar = ({ sidebarOpen, setSidebarOpen }) => {
                   Calendario
                 </NavLink>
               </li>
-            
+              <li>
+                <NavLink
+                  to="/settings"
+                  className={`group relative flex items-center gap-2.5 rounded-sm py-2 px-4 font-medium text-bodydark1 duration-300 ease-in-out hover:bg-graydark dark:hover:bg-meta-4 ${
+                    pathname.includes('settings') && 'bg-graydark dark:bg-meta-4'
+                  }`}
+                >
+                  <svg
+                    className="fill-current"
+                    width="18"
+                    height="18"
+                    viewBox="0 0 18 18"
+                    fill="none">
+                  </svg>
+                  Configuración
+
+                  
+                </NavLink>
+              </li> 
             </ul>
           </div>
 

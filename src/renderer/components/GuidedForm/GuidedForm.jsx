@@ -2,14 +2,11 @@ import React,{useState,createContext,useContext, useEffect,useRef} from 'react'
 
 
 import SelectGroupOne from '../Forms/SelectGroup/SelectGroupOne';
-import { useModal } from '../Modal/Modal';
+import { useModal } from '../Modal.jsx';
 
 import App from '../Notifications.jsx';
-import {useAuth} from "../../hooks/useAuth.jsx";
 
-import {useJwt} from "react-jwt";
-import useValidate from '../../hooks/useValidation.jsx';
-
+import useValidate from '../../hooks/useValidate';
 const GuideContext = createContext()
 
 
@@ -25,11 +22,13 @@ export function useGuide(){
 export function GuidedForm({initState,updateState,children}) {
 
   
+ 
    const {validate,fields,setField,errors} = useValidate(initState)
   
 
   
    const onNextCallbackRef = useRef(null); 
+   const onBackCallbackRef = useRef(null);
 
    const executeOnNext = () => {
     if (onNextCallbackRef.current) {
@@ -37,6 +36,14 @@ export function GuidedForm({initState,updateState,children}) {
     }
     return true; // Por defecto, permite avanzar si no hay callback
   };
+
+  const executeOnBack = () => {
+    if (onBackCallbackRef.current) {
+      return onBackCallbackRef.current(); // Ejecuta el callback almacenado
+    }
+    return prevStep(); // Por defecto, permite avanzar si no hay callback
+  };
+
     const handleChange = (e) => {
       
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -51,9 +58,13 @@ export function GuidedForm({initState,updateState,children}) {
     const [canNext,setCanNext] = useState(true)
 
 
-    const registerOnNext = (callback) => {
-      onNextCallbackRef.current = callback; // Almacena el callback en la referencia
-    };
+        const registerOnNext = (callback) => {
+          onNextCallbackRef.current = callback; // Almacena el callback en la referencia
+        };
+
+        const registerOnBack = (callback) => {
+          onBackCallbackRef.current = callback; // Almacena el callback en la referencia
+        };
    /*  const registerOnNext = React.useCallback((callback) => {
       setOnNext(() => callback);
     },[]); */
@@ -68,18 +79,20 @@ export function GuidedForm({initState,updateState,children}) {
     const enableNext = () => setCanNext(false)  
    // const {setTotalSteps} = useGuide()
 
-  
+   const goToStep = (step) => setStep(step)
 
    const totalSteps = React.Children.toArray(children).length;
     //setTotalSteps(children.length)
     
 
+   
   return (
 
     <GuideContext.Provider value={{
       updateState,
         step,
         formData:fields,
+        goToStep,
         handleChange,
         nextStep,
         prevStep,
@@ -87,7 +100,9 @@ export function GuidedForm({initState,updateState,children}) {
         enableNext,
         canNext,
         registerOnNext,
+        registerOnBack,
         executeOnNext,
+        executeOnBack,
         validate,
         setField,
        
@@ -114,7 +129,7 @@ export function GuidedForm({initState,updateState,children}) {
 
  export function StepForm({targetStep,children,totalSteps,handleForm=null}) {
 
-    const { step, nextStep, prevStep,canNext,onNext,executeOnNext } = useGuide();
+    const { step, nextStep, prevStep,canNext,onNext,executeOnNext,executeOnBack } = useGuide();
 
     if (step !== targetStep) return null; // Renderiza solo si el paso actual coincide con el `targetStep`
   
@@ -122,7 +137,6 @@ export function GuidedForm({initState,updateState,children}) {
 
 
 
-  console.log(canNext)
   return (
     <>
     {/* <App></App> */}
@@ -132,7 +146,7 @@ export function GuidedForm({initState,updateState,children}) {
         {
             <button 
                 className='cursor-pointer rounded-lg border border-primary bg-primary p-4 text-white transition hover:bg-opacity-90'
-                onClick={targetStep == 1 ?  ()=>{} :prevStep}  >prev</button>
+                onClick={targetStep == 1 ?  ()=>{} :()=>executeOnBack()}  >prev</button>
         }
         <button disabled={canNext}
         className='cursor-pointer rounded-lg border border-primary bg-primary p-4 text-white transition hover:bg-opacity-90'

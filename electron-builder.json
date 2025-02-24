@@ -1,3 +1,5 @@
+
+
 {
     "appId": "com.presta.app",
     "productName": "PrestamosApp",
@@ -14,8 +16,8 @@
     "files": [
         "dist/**/*",
         "src/main/**/*",
-      "package.json",
-      "app-update.yml"
+      "./package.json",
+      "./app-update.yml"
     ],
     "extraResources": [
       {

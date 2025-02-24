@@ -5,10 +5,11 @@ import DropdownUser from './DropdownUser.jsx';
 import LogoIcon from '../../images/logo/logo-icon.svg';
 import DarkModeSwitcher from './DarkModeSwitcher.jsx';
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const Header = (props) => {
 
-    
+    const navigate = useNavigate()
 
   return (
     <header className="sticky top-0  flex w-full bg-white drop-shadow-1 dark:bg-boxdark dark:drop-shadow-none">
@@ -55,6 +56,7 @@ const Header = (props) => {
               </span>
             </span>
           </button>
+
           {/* <!-- Hamburger Toggle BTN --> */}
 
           <Link className="block flex-shrink-0 lg:hidden" to="/">
@@ -67,6 +69,10 @@ const Header = (props) => {
         </div>
 
         <div className="flex items-center gap-3 2xsm:gap-7">
+          
+        <h2 className="text-title-md2 font-semibold text-black dark:text-white">
+        <button onClick={()=>navigate(-1)}>&lt; </button>   <button onClick={()=>navigate(+1)}>&gt;</button> 
+      </h2>
           <ul className="flex items-center gap-2 2xsm:gap-4">
             {/* <!-- Dark Mode Toggler --> */}
            {/*  <DarkModeSwitcher /> */}

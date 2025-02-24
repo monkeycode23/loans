@@ -2,13 +2,15 @@ import { createSlice } from '@reduxjs/toolkit';
 
 const initialState = {
     loans: [],
+    
     totalLoans: 0,
-    payments: [],
+    //payments: [],
     monthly: 0,
     loansTotalAmount: 0,
     paymentsTotalAmount: 0,
     loading: false,
     error: null,
+    loan: null,
 }
 
 const loansSlice = createSlice({
@@ -21,18 +23,33 @@ const loansSlice = createSlice({
         setTotalLoans: (state, action) => {
             state.totalLoans = action.payload;
         },  
-        setPayments: (state, action) => {   
-            state.payments = action.payload;
-        },
+      addLoan: (state, action) => {
+        state.loans = [ action.payload,...state.loans];
+      },
+      updateLoan: (state, action) => {
+        console.log("action.payload---a>>",action.payload)
+        state.loans = state.loans.map(loan => loan.id === action.payload.id ? action.payload.loan : loan);
+      },
+      deleteLoan: (state, action) => {
+        console.log("action.payload---a>>",action.payload)
+        state.loans = state.loans.filter(loan => loan.id !== action.payload.id);
+      },
         setMonthly: (state, action) => {
             state.monthly = action.payload;
         },  
         setLoansTotalAmount: (state, action) => {   
             state.loansTotalAmount = action.payload;
         },
-        setPaymentsTotalAmount: (state, action) => {
-            state.paymentsTotalAmount = action.payload;
+        setLoan: (state, action) => {
+
+           // console.log("action.payload---a>>",action.payload)
+            //console.log("state.loan---a>>",state.loan)
+            state.loan = action.payload
+
+           // console.log("state.loan---a>>",state.loan)
         },
+     
+
         setLoading: (state, action) => {
             state.loading = action.payload;
         },
@@ -42,7 +59,7 @@ const loansSlice = createSlice({
     },
 })
 
-export const { setLoans, setTotalLoans, setPayments, setMonthly, setLoansTotalAmount, setPaymentsTotalAmount, setLoading, setError } = loansSlice.actions;
+export const {  setLoans, setTotalLoans, addLoan, updateLoan, deleteLoan, setMonthly, setLoansTotalAmount, setLoan, setLoading, setError } = loansSlice.actions;
 export default loansSlice.reducer;      
 
 

@@ -234,6 +234,15 @@ async function compareHash(message, hashToCompare) {
   return "Fecha fuera de rango";
 } */
 
+  export const excludeProperties = (obj, keysToExclude) => {
+    return Object.keys(obj).reduce((acc, key) => {
+      if (!keysToExclude.includes(key)) {
+        acc[key] = obj[key];
+      }
+      return acc;
+    }, {});
+  };
+  
 
   export function getLastWeek() {
     const today = new Date();

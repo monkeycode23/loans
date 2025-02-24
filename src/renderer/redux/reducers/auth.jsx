@@ -2,6 +2,7 @@ import { createSlice } from '@reduxjs/toolkit';
 import { decodeToken } from '../../common/funcs';
 
 
+
 const setToken = ()=>{
     const token  = localStorage.getItem("auth_token")
     console.log(token)
@@ -9,13 +10,14 @@ const setToken = ()=>{
         const decodedToken = decodeToken(token)
         if(decodedToken.expirationDate < Date.now()){
             localStorage.removeItem("auth_token")
-            state.sessionExpired = true
+            
             return null
         }
         return decodedToken
     }
     return null
 }
+
 const initialState = {
     user: null,
     sessionExpired:false,
