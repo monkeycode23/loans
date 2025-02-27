@@ -3,11 +3,12 @@ import CardDataStats from "../../components/CardDataStats.jsx";
 
 import { MoneyBag } from "../../components/Icons.jsx";
 
-import { formatAmount } from "../../common/funcs.jsx";
+import { formatAmount, getWeekDays,getWeekStartEnd } from "../../common/funcs.jsx";
 
 import { useSelector, useDispatch } from "react-redux";
 
-import { setPayments } from "../../redux/reducers/payments.jsx";
+import { setPayments,setPaymentsCount } from "../../redux/reducers/payments.jsx";
+
 
 import {
   setPage,
@@ -15,25 +16,36 @@ import {
   setTotalPages,
   setSearch,
   setCount,
+  setFilter,
   setTotalResults,
-} from "../../redux/reducers/Pagination.jsx";
+} from "../../redux/reducers/_pagination"
 
-import { getTodayPaymentsDate, getPaymentsGainsDate } from "./funcs.jsx";
+import { getTodayPaymentsDate, getPaymentsGainsDate, getClientPaymentsCountDate,toLocaleDate } from "./funcs.jsx";
 import PaymentList from "./PaymentsList.jsx";
 import CalendarApp from "../../components/Calendar.jsx";
 
 import { setNetGains, setBruteGains } from "../../redux/reducers/gains.jsx";
 
+import  ApexChart from "./chart"
 
+import { calculatePercentages } from "../../common/funcs.jsx";
 const Payments = () => {
   const dispatch = useDispatch();
 
   const pagination = useSelector((state) => state.pagination);
 
+  const totalResults = useSelector((state) => state.pagination.totalResults);
+
+  const paymentsCount = useSelector((state) => state.payments.paymentsCount);
+
   const payments = useSelector((state) => state.payments.payments);
 
-  console.log(pagination);
-  const { page, limit, totalPages, search } = pagination;
+ 
+
+  //console.log(pagination);
+  const { page, limit, totalPages, search, filter } = pagination;
+
+ 
 
   const gains = useSelector((state) => state.gains);
 
@@ -46,32 +58,44 @@ const Payments = () => {
     const init = async () => {
 
 
+     
 
-      const data = await getTodayPaymentsDate({
+      const data = await getTodayPaymentsDate(filter.date,{
+        search,
         page,
         limit,
-        search,
       });
-      console.log(data);
+
+      console.log("data:----------------------------->",data);
 
       dispatch(setPayments(data.payments));
 
       dispatch(setTotalResults(data.total));
 
+      //const {start,end} = getWeekStartEnd(date)
 
-      console.log("data.total",data.total,limit);
-      console.log("data.total pages",data.total > limit ? Math.ceil(data.total / limit) : 1);
+      const _paymentsCount = await getClientPaymentsCountDate(toLocaleDate(new Date()));
+
+      //console.log("paymentsCount",paymentsCount);
+
+      dispatch(setPaymentsCount(_paymentsCount));
+
+    
+     
+
+      //console.log("data.total",data.total,limit);
+      //console.log("data.total pages",data.total > limit ? Math.ceil(data.total / limit) : 1);
       dispatch(
         setTotalPages(data.total > limit ? Math.ceil(data.total / limit) : 1)
       );
 
-      console.log("limit",limit);
-      console.log("page",page);
+      //console.log("limit",limit);
+      //console.log("page",page);
       const gains = await getPaymentsGainsDate({
-        date,
+        date:new Date(),
       });
 
-      console.log("gains",gains);
+      console.log("gains  -------->>>>",gains);
 
       
       dispatch(setNetGains(gains.netGains));
@@ -109,7 +133,7 @@ const Payments = () => {
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3 md:gap-6 xl:grid-cols-3 2xl:gap-7.5">
         <CardDataStats
           title="Total de pagos de hoy"
-          total={payments.length}
+          total={totalResults}
           rate="0.43%"
           levelUp
         >
@@ -158,20 +182,44 @@ const Payments = () => {
         </CardDataStats>
       </div>
 
-      <div className="mt-4 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-3 gap-4">
+      <div className={`mt-4 grid grid-cols-1 
+        md:grid-cols-3 
+        lg:grid-cols-3 
+        xl:grid-cols-3 
+        md:gap-2 
+        xl:gap-2`}>
         <PaymentList date={date} payments={payments}></PaymentList>
-        <div className="col-span-1">
+        <div className="col-span-1 ">
           <CalendarApp
             onClick={async (date) => {
-              console.log(date);
+              console.log("event date---->",date);
 
-              const data = await getTodayPaymentsDate({
-                page,
+              dispatch(setFilter({
+                ...filter,
+                date:date,
+              }));
+
+              const data = await getTodayPaymentsDate(date,{
+                
+                filter: {
+                  search: search,
+                  page,
                 limit,
-                search: date,
+                },
               });
               
+              //const {start,end} = getWeekStartEnd(date)
+
+             // console.log("start",start);
+
+              const paymentsCount = await getClientPaymentsCountDate(date.toISOString().split('T')[0]);
+
+              //console.log("paymentsCount",paymentsCount);
+
+              dispatch(setPaymentsCount(paymentsCount));
+             
               
+
               dispatch(setPayments(data.payments));
 
               dispatch(setTotalResults(data.total));
@@ -189,7 +237,7 @@ const Payments = () => {
                 date,
               });
         
-              console.log("gains",gains);
+              //console.log("gains",gains);
         
               
               dispatch(setNetGains(gains.netGains));
@@ -197,6 +245,10 @@ const Payments = () => {
               
             }}
           ></CalendarApp>
+          <div className="mt-1" >
+          <ApexChart  />
+
+          </div>
         </div>
       </div>
     </>

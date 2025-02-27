@@ -1,6 +1,6 @@
 import React from "react"
 
-  function Tag({label="test",type="primary",title=""}) {
+  function Tag({label="test",type="primary",title="",icon=""}) {
 
     return (<span title={title} className={`
       ${type=="primary" ?"bg-primary  ":""}
@@ -11,7 +11,7 @@ import React from "react"
            ${type=="success2" ? "bg-green-500 ":""}
             ${type=="success3" ? "bg-green-700 ":""}
           text-white rounded-md p-1 text-sm mr-1 
-      `}>{label}</span>)
+      `}> {label}</span>)
   }
 
 

@@ -9,13 +9,13 @@ export  function formatDateDifference(date) {
     // Calcular la diferencia en milisegundos
     const timeDiff = givenDate - today;
     
-  //  console.log(date+" "+today)
+  //  //console.log(date+" "+today)
     // Diferencia en días
       // Diferencia en días (utilizando Math.floor para redondear hacia abajo)
   const daysDiff = Math.floor(timeDiff / (1000 * 3600 * 24))+1;
 
   const roundedDaysDiff = Math.round(daysDiff);
-   // console.log("diferencia de dias " +daysDiff)
+   // //console.log("diferencia de dias " +daysDiff)
 
     
      // Si la fecha dada es ayer
@@ -76,6 +76,62 @@ export  function formatDateDifference(date) {
   }
 
 
+  export function getYearStartEnd(year){
+    const start = `${year}-01-01`
+    const end = `${year}-12-31`
+    return {start,end}
+  }
+
+  export function getLastWeeksStartEnd() {
+    const hoy = new Date();
+  
+    // Obtener el día de la semana (0=domingo, 1=lunes, ..., 6=sábado)
+    const diaDeLaSemana = hoy.getDay();
+    
+    // Calcular la diferencia en días con el lunes de la semana pasada
+    const diasHastaElLunesPasado = diaDeLaSemana + 7 - 1; // 1 es el lunes (ajustamos si hoy es domingo)
+    
+    // Calcular el lunes de la semana pasada
+    const lunesSemanaPasada = new Date(hoy);
+    lunesSemanaPasada.setDate(hoy.getDate() - diasHastaElLunesPasado);
+  
+    // Calcular el domingo de la semana pasada
+    const domingoSemanaPasada = new Date(lunesSemanaPasada);
+    domingoSemanaPasada.setDate(lunesSemanaPasada.getDate() + 6); // 6 días después del lunes
+  
+    // Formatear las fechas en formato YYYY-MM-DD
+    const formatoFecha = fecha => fecha.toISOString().split('T')[0]; // Devuelve fecha en formato 'YYYY-MM-DD'
+  
+    return {
+      start: formatoFecha(lunesSemanaPasada),
+      end: formatoFecha(domingoSemanaPasada)
+    };
+  }
+  
+ /*  // Ejemplo de uso:
+  const fechasSemanaPasada = obtenerFechasSemanaPasada();
+  //console.log(fechasSemanaPasada);
+   */
+
+
+  export function calculatePercentages(value,total){
+    //console.log("value:----------------------------->",value)
+    //console.log("total:----------------------------->",total)
+
+    const percentage = value ? ((value/total)*100).toFixed(2) : 0.00
+    //console.log("percentagevall:----------------------------->",percentage)
+    return percentage
+  }
+  export function getWeekDays(){
+    const days = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"]
+    return days
+  }
+
+  export function getWeekStartEnd(date){
+    const start = getMonday(date)
+    const end = getSunday(date)
+    return {start,end}
+  }
 
  export  function getMonday(date) {
     const dayOfWeek = date.getDay();  // Obtiene el día de la semana (0 = domingo, 1 = lunes, ..., 6 = sábado)
@@ -110,21 +166,22 @@ export  function formatDateDifference(date) {
   }
 
 
- export  function getMonthStartEnd() {
-    const today = new Date();  // Fecha actual
-  
-    // Fecha de inicio del mes (primer día del mes)
-    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-    
-    // Fecha de fin del mes (último día del mes)
-    const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-  
-    // Formatear las fechas como 'YYYY-MM-DD'
-    const formatDate = (date) => date.toISOString().split('T')[0];
-  
+ export  function getMonthStartEnd(month) {
+         // Obtener el año y el mes actual
+  const date = new Date();
+  const year = date.getFullYear();
+
+  // Calcular el primer día del mes
+  const startDate = new Date(year, month - 1, 1);  // Restamos 1 porque los meses en JavaScript son indexados desde 0
+  const start = startDate.toISOString().split('T')[0]; // Convertimos a formato YYYY-MM-DD
+
+  // Calcular el último día del mes
+  const endDate = new Date(year, month, 0); // El día 0 del siguiente mes nos da el último día del mes actual
+  const end = endDate.toISOString().split('T')[0]; // Convertimos a formato YYYY-MM-DD
+
     return {
-      start: formatDate(startOfMonth),
-      end: formatDate(endOfMonth)
+      start,
+      end
     };
   }
 
@@ -262,7 +319,7 @@ async function compareHash(message, hashToCompare) {
     const endOfLastWeek = new Date(startOfLastWeek);
     endOfLastWeek.setDate(startOfLastWeek.getDate() + 6); // Domingo es 6 días después del lunes
     
-    console.log(endOfLastWeek)
+    ////console.log(endOfLastWeek)
     return {
         start: startOfLastWeek,
         end: endOfLastWeek

@@ -8,18 +8,84 @@ import ChartThree from '../../components/Charts/ChartThree';
 import { formatAmount } from '../../common/funcs';
 import ChartTwo from '../../components/Charts/ChartTwo';
 import ChartOne from '../../components/Charts/ChartOne';
+import { getTotalLoans,getLoansTotalAmounts,getTotalPaidPaymentsMoney } from './funcs';
+import { useDispatch } from 'react-redux';
+import { setTotalLoans,setTotalClients,setTotalPayments,
+  setTotalLoansMoney,setTotalPaidPaymentsMoney,
+  setTotalLoansGains,setTotalPaidPaymentsGains,
+  setTotalPaidPaymentsNetGains } from '../../redux/reducers/dashboard';
+import { toLocaleDate } from '../Payments/funcs';
+
+
+
 const Dashboard = () => {
 
+    const dispatch = useDispatch()
     const loans = useSelector(state => state.loans.loans)
-    const totalLoans = useSelector(state => state.loans.totalLoans)
-    const payments = useSelector(state => state.payments.payments)
-    const monthly = useSelector(state => state.loans.monthly)
-    const loansTotalAmount = useSelector(state => state.loans.loansTotalAmount)
-    const paymentsTotalAmount = useSelector(state => state.payments.paymentsTotalAmount)
-    const clients = useSelector(state => state.clients.clients)
-    const totalClients = useSelector(state => state.clients.totalClients)
 
-  
+    const totalLoans = useSelector(state => state.dashboard.totalLoans)
+    const totalLoansMoney = useSelector(state => state.dashboard.totalLoansMoney)
+    const totalPaidPaymentsMoney = useSelector(state => state.dashboard.totalPaidPaymentsMoney)
+    const totalPaidPaymentsGains = useSelector(state => state.dashboard.totalPaidPaymentsGains)
+    const totalPaidPaymentsNetGains = useSelector(state => state.dashboard.totalPaidPaymentsNetGains)
+   
+   
+   
+   
+   
+    useEffect(() => {
+
+
+
+      
+
+
+      const init = async () => {
+
+
+        /**
+         * set expired payments
+         */
+
+        const today = toLocaleDate(new Date())
+        console.log("today:----------------------------->",today)
+        
+        await window.database.models.Payments.updateFilter({
+          where: `status = 'pending' AND payment_date < '${today}'`,
+          data: {
+            status: 'expired'
+          }
+        })
+
+        ///////////////////////////////////////////////////
+
+        const fetchTotalLoans = await getTotalLoans()
+        console.log("totalLoans:----------------------------->",fetchTotalLoans)
+        dispatch(setTotalLoans(fetchTotalLoans))
+
+        const fetchLoansTotalAmounts = await getLoansTotalAmounts()
+        console.log("loansTotalAmounts:----------------------------->",fetchLoansTotalAmounts)
+        
+
+
+        dispatch(setTotalLoansMoney(fetchLoansTotalAmounts.loans))
+
+        const fetchTotalPaidPaymentsMoney = await getTotalPaidPaymentsMoney()
+        console.log("totalPaidPaymentsMoney:----------------------------->",fetchTotalPaidPaymentsMoney)
+        dispatch(setTotalPaidPaymentsMoney(fetchTotalPaidPaymentsMoney))
+       
+        dispatch(setTotalLoansGains(fetchLoansTotalAmounts.gains))
+        dispatch(setTotalPaidPaymentsGains(fetchTotalPaidPaymentsMoney.gains))
+        dispatch(setTotalPaidPaymentsNetGains(fetchTotalPaidPaymentsMoney.net_gains))
+        /*  const fetchTotalClients = await getTotalClients()
+        console.log("totalClients:----------------------------->",fetchTotalClients)
+        dispatch(setTotalClients(fetchTotalClients))
+         */
+        
+      }
+      init()
+    },[])
+
     return (
       <>
      
@@ -27,16 +93,16 @@ const Dashboard = () => {
           <CardDataStats title="Total de Prestamos" total={totalLoans} rate="0.0" levelUp>
             <WalletIcon></WalletIcon>
           </CardDataStats>
-          <CardDataStats title="Ganancia Total" total={"$"+formatAmount(monthly) || 0}  levelUp>
+          <CardDataStats title="Ganancia Total" total={"$"+formatAmount(totalPaidPaymentsGains) }  levelUp>
             <MoneyBag  className="fill-primary dark:fill-white"
               width="22"
               height="22"></MoneyBag>
           </CardDataStats>
-          <CardDataStats title="Total Dinero cirulando" total={"$"+formatAmount(loansTotalAmount || 0) }  levelUp>
+          <CardDataStats title="Total Dinero cirulando" total={"$"+formatAmount(totalLoansMoney - totalPaidPaymentsMoney.total_amount) }  levelUp>
            <DollarSign width={"22"} height={"22"}/>
           </CardDataStats>
   
-          <CardDataStats title="Total pagado de cuotas" total={"$"+formatAmount(paymentsTotalAmount || 0) }  levelUp>
+          <CardDataStats title="Total pagado de cuotas" total={"$"+formatAmount(totalPaidPaymentsNetGains) }  levelUp>
            <DollarSign width={"22"} height={"22"}/>
           </CardDataStats>
           
@@ -49,6 +115,9 @@ const Dashboard = () => {
         <ChartThree /> 
         <ChartTwo></ChartTwo>
         <ChartOne></ChartOne>
+        <div className='col-span-12'>
+          <h3>Ganancias por mes</h3>
+        </div>
        {/*  
           
           

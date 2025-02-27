@@ -49,7 +49,7 @@ const CalendarApp = ({onClick}) => {
         onClickDay={handleDateClick}
         className={"w-full rounded-md border border-stroke"}
       />
-      <h2>Eventos para {date.toDateString()}:</h2>
+      
       <ul>
         {formatEvents(date).map((event, index) => (
           <li key={index}>{event}</li>

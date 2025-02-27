@@ -9,16 +9,20 @@ import { formatAmount } from '../../common/funcs'
 import { formatDateDifference } from '../../common/funcs'
 
 import { getNotes } from './funcs'
-
+import { useSelector,useDispatch   } from 'react-redux'
+import { setNotes } from '../../redux/reducers/notes'
 function PaymentModal({payment,button}) {
    //console.log(payment)
-   const [notes,setNotes] = useState([])
+   //const [notes,setNotes] = useState([])
+   const notes = useSelector(state=>state.notes.notes)
+   const dispatch = useDispatch()
 
    useEffect(()=>{
     const init = async ()=>{
         const notes = await getNotes(payment.id,"payment")
         console.log("notes---a>>",notes)
-        setNotes(notes)
+        dispatch(setNotes(notes))
+
     }
     init()
    },[])
@@ -29,7 +33,7 @@ function PaymentModal({payment,button}) {
         <div className='flex gap-3'>
 
           <div className="bg-lime-500 text-white w-30 h-30 flex flex-row justify-center items-center rounded-full">
-                     <PaymentIcon/>
+                     <PaymentIcon width={33} height={33}/>
            </div>
 
             <div className='flex flex-col gap-4'>
@@ -50,12 +54,18 @@ function PaymentModal({payment,button}) {
                 
             </div >
            
-            <div>
-              Notas:   {notes ? (notes.map((e)=>e.notes).join("\n")): "sin notas..."}
-            </div>
+          
            </div>
+
+         
            
        </div>
+
+       <div>
+              <span className='text-md text-md text-black'>Notas:   {notes ?
+              Array.isArray(notes) ? notes.map((e)=>e.notes).join("\n") : notes
+              : "sin notas..."}</span>
+            </div>
   
     </Modal>
   )

@@ -11,6 +11,7 @@ import Step2 from "./Step2"
 import Step5 from "./finance"
 import Step3 from "./basic"
 import Step4 from "./contact"
+import { UserIcon } from "../../../components/Icons";
 
 
 
@@ -19,7 +20,9 @@ export function AddClientModal({addClient}) {
 
  
   return (
-    <Modal buttonLabel={"agregar"} button={true} title={"Agregar Cliente"}>
+    <Modal buttonLabel={"agregar"} button={(<button className="flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-md">
+      <UserIcon width={10} height={10}></UserIcon>
+      Nuevo Ciente</button>)} title={"Agregar Cliente"}>
         <GuidedForm updateState={addClient}
          initState={
           {

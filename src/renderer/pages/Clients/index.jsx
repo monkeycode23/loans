@@ -13,39 +13,54 @@ import { useDispatch, useSelector } from 'react-redux';
 
 import {setClients,setTotalClients} from '../../redux/reducers/clients'
 import {setLoans} from '../../redux/reducers/loans'
+import {setTotalPages} from '../../redux/reducers/_pagination'
 
-import {getClients} from './funcs'
+
+import {getClients,getTotalClientsDebtors,getTotalClientsIncompletePayments} from './funcs'
 
 const Clients= () => {
 
-  const clients = useSelector((state) => state.clients.clients);
-  const totalClients = useSelector((state) => state.clients.totalClients);
-  const [page, setPage] = useState(1);
-  const [limit, setLimit] = useState(4);
-  const [search, setSearch] = useState("");
-  const [totalPages,setTotalPages] = useState(1);
-  const [filter, setFilter] = useState("");
-  const [debtors,setDebtors]= useState(0)
-  const [incomplete,setIncomplete]= useState(0)
-  const [totalResults, setTotalResults] = useState(0)
   const dispatch = useDispatch()
 
+//clients
+ // const clients = useSelector((state) => state.clients.clients);
+  const totalClients = useSelector((state) => state.clients.totalClients);
+  
+  //cards
+  const [debtors,setDebtors]= useState(0)
+  const [incomplete,setIncomplete]= useState(0)
+//pagination
+  const [page,setPage] = useState(1)
+  const [limit,setLimit] = useState(10)
+  const [search,setSearch] = useState("")
+  const [totalPages,setTotalPages] = useState(1)
+  const [filter, setFilter] = useState("");
 
   useEffect(()=>{
 
     const init  = async()=>{
+
+      //clients
       const result  =await getClients({
         nickname:search,
         state:filter
       },limit,page)
 
-     // console.log("result:----------------------------->",result)
+      //cards
+      const totalDebtors = await getTotalClientsDebtors()
+      setDebtors(totalDebtors)
+
+      const totalIncompletePayments = await getTotalClientsIncompletePayments()
+      setIncomplete(totalIncompletePayments)
+
+      //pagination
+      console.log("result:----------------------------->",result)
       dispatch(setClients(result.clients))
      
       const totalClientsQuery = await window.database.models.Clients.getTotalClients()
       
       //console.log("totalClientsQuery:----------------------------->",totalClientsQuery)
-      
+
       
       dispatch(setTotalClients(totalClientsQuery[0].total))
 
@@ -67,51 +82,11 @@ const Clients= () => {
     
     
   },[search,filter,page,limit,totalPages])
-  /* useEffect(()=>{
-
-    const fetchData = async()=>{
-
-
-      const debtorsQuery = await clientsModel.getClientsDebtors()
-
-      console.log(debtorsQuery[0].expired_clients_count)
-      setDebtors(debtorsQuery[0].expired_clients_count)
-      setIncomplete(debtorsQuery[0].incomplete_clients_count)
-      const result  =await clientsModel.getClients({
-        nickname:search,
-        state:filter
-      },limit,page)
-      
-      setTotalResults(await clientsModel.getTotalClients())
-      
-       setClients(result.clients)
-
-      // console.log(clients)
-      
-      let totalRows =result.total
-      
-      setTotalClients(totalRows)
-      console.log(totalClients)
-      if(search.length > 0){
-        totalRows = result.length
-      }
-
-      
-      setTotalPages(totalRows>limit ? Math.ceil(totalRows/limit) : 1)
-      
-      
-      
-      //setTotalClients()
-
-    }
-   
-    
-    fetchData()
-     
-  },[limit,page,search,totalClients,filter]) */
+  
 
   function changePage(page){
-    setPage(page)
+   setPage(page)
+  
   }
 
   async function addClient(client) {
@@ -161,72 +136,36 @@ const Clients= () => {
       <AddClientModal addClient={addClient} ></AddClientModal>
 
 
-        <div className='mt-4 grid grid-cols-1  bg-white p-5'>
-          <div className='flex justify-between  items-center'>
-            <div>
+      
+      <div className="mt-4 grid grid-cols-1 gap-1 bg-white p-5">
+      <div className='flex gap-2 sm:flex-col flex-col xl:flex-row  items-center'>
+            <div className='w-2/5 sm:w-full xl:w-1/2'>
+             
+
               <input
-                type="text"
-                placeholder="Buscar..."
-                className=" pt-3 pb-3 pl-3 pr-3 border border-gray-300 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={search}
-                onChange={(e) => {
-
-                  console.log("asd")
-                  setSearch(e.target.value)
-                  setPage(1)
-                }}
-              />
+              value={search}
+              onChange={(e)=>{
+                console.log("asd")
+                setSearch(e.target.value)
+                setPage(1)
+              }}
+              //onChange={(e)=>setField({type:"set",field:"password",value:e.target.value})}
+              name="name"
+              type="text"
+              placeholder="ingrese el nombre del cliente"
+              // defaultValue={fields.password.value}
+              // value={fields.password.value}
+              className={`w-full mb-3 rounded-lg border border-stroke  focus:text-black bg-transparent py-3 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary`}
+  
+            />
             </div>
 
-            <div>
-              <Select className=""
+           
+            <div className='w-1/5 sm:w-full xl:w-1/2'>
+              <Select className="w-full"
                 onChange={async (e) => setFilter(e.target.value)}
                 options={[{
-                  label: "filtro Prestamos",
-                  value: "",
-                  selected: true
-                },
-                {
-
-                  label: "Sin prestamos",
-                  value: "expired",
-                  selected: false
-                },
-
-                {
-
-                  label: "activos",
-                  value: "incomplete",
-                  selected: false
-                },
-
-                {
-
-                  label: "completados",
-                  value: "incomplete",
-                  selected: false
-                },
-
-                {
-
-                  label: "cancelados",
-                  value: "incomplete",
-                  selected: false
-                },
-
-                
-
-
-                ]}>
-
-              </Select>
-
-            </div>
-            <div>
-              <Select className=""
-                onChange={async (e) => setFilter(e.target.value)}
-                options={[{
-                  label: "filtro Cuotas",
+                  label: "filtro cuotas",
                   value: "",
                   selected: true
                 },
@@ -253,44 +192,12 @@ const Clients= () => {
 
             </div>
 
+            <div className='w-2/5 sm:w-full xl:w-1/2'>
             <Pagination currentPage={page} totalPages={totalPages} changePage={changePage}></Pagination>
 
+            </div>
           </div>
 
-
-        </div>
-      
-      <div className="mt-4 grid grid-cols-1 gap-1 bg-white p-5">
-
-
-
-      <div className="grid grid-cols-2 xs:grid-cols-1 mb-5">
-
-      
-
-      
-      {/* <div className='col-span-2'>
-         
-            <select multiple>
-                <option>con deudas</option>
-                <option>mal cliente</option>
-                <option>buen cliente</option>
-            </select>
-              <input
-                type="number"
-                placeholder="limite de resultados"
-                className="h-10  p-2 border border-gray-300 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                value={search}
-                onChange={(e) => {
-
-                  console.log("asd")
-                  setLimit(e.target.value)
-                }}
-              />
-        </div> */}
-      
-     
-      </div>
           <ClientList />   
       </div>
     

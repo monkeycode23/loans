@@ -5,10 +5,11 @@ import React, { useState } from 'react'
 import Modal from "../../components/Modal"
 import { useModal } from '../../components/Modal'
 import {useNotification} from "../../components/Notifications"
-import { useSelector,useDispatch } from "react-redux";
+import { setBruteGains, setNetGains } from "../../redux/reducers/gains";
 
-import { setPayments } from '../../redux/reducers/payments.jsx';
-
+import { useDispatch, useSelector } from "react-redux";
+import { setPayments,updatePayment,setPaymentsCount } from '../../redux/reducers/payments.jsx';
+import { setNotes } from '../../redux/reducers/notes';
 
 function IncompleteModal({payment,button}) {
 
@@ -24,27 +25,83 @@ function IncompleteModal({payment,button}) {
 }
 
 
-
 function FormModal({payment}) {
 
     console.log(payment)
 
+    const dispatch = useDispatch()
    // const {setPayments} = useTodayPayments()
-    
+    const {setNotification,showNotification} = useNotification()
     const {toggleModal} = useModal()
     const [monto,setMonto] = useState()
-
-   /*  async function onClick(e) {
+    const gains = useSelector((state)=>state.gains)
+    const paymentsCount = useSelector((state)=>state.payments.paymentsCount)
+     async function onClick(e) {
+        e.preventDefault()
         console.log("asdasd")
         console.log(payment)
-        await paymentsModel.editPayment(payment.paymentId,{
-            state:"incomplete",
+        console.log(monto)
+        
+
+
+        
+        await window.database.models.Payments.updatePayment({
+            id:payment.id,
+            status:"incomplete",
             incomplete_amount:monto,
-            payed_date:"NULL",
-            motes:`pago incompleto,monto pagado ${monto} resta por pagar ${12} para completar el pago (los pagos incompletos no estan acoplados al calculo de la ganancia)`
+            paid_date:"NULL",
         })
 
-        setPayments((prev)=>prev.map((e)=>{
+        await window.database.models.Loans.updateLoan({
+            id:payment.loan_id,
+            status:"active"
+           
+        })
+
+        const   notes= "Pago incompleto,monto pagado "+monto+" resta por pagar "+(payment.amount-monto)+" para completar el pago (los pagos incompletos no estan acoplados al calculo de la ganancia)"
+
+        await window.database.models.Notes.createNote({
+            payment_id:payment.id,
+            notes:notes
+        })
+
+
+        if(payment.status=="pending"){
+        dispatch(
+            setPaymentsCount({
+              ...paymentsCount,
+              pending: paymentsCount.pending - 1,
+              incomplete: paymentsCount.incomplete + 1,
+            })
+          );
+        }
+
+        if(payment.status=="expired"){
+            dispatch(
+                setPaymentsCount({
+                  ...paymentsCount,
+                  expired: paymentsCount.expired - 1,
+                  incomplete: paymentsCount.incomplete + 1,
+                })
+              );
+            }
+        /* dispatch(setBruteGains(gains.bruteGains + payment.gain));
+        dispatch(setNetGains(gains.netGains + payment.amount));
+ */
+        dispatch(updatePayment({
+            id:payment.id,
+            payment:{
+                ...payment,
+            status:"incomplete",
+            incomplete_amount:monto,
+            paid_date:null,
+            }
+            
+        }))
+
+
+        dispatch(setNotes(notes))
+        /* setPayments((prev)=>prev.map((e)=>{
 
             if(e.paymentId==payment.paymentId){
                 return {
@@ -55,21 +112,21 @@ function FormModal({payment}) {
             }else{
                 return e
             }
-        }))
+        })) */
 
 
         toggleModal()
 
-       /*  setNotification({
+         setNotification({
             type:"warning",
             message:"Pago marcado como incompleto"
         })
-        showNotification() */
-    /*} */
+        showNotification()
+    } 
 
   return (
    <>
-    <form onSubmit={(e)=>e.preventDefault()}>
+    <form onSubmit={(e)=>e.preventDefault()} noValidate>
     <div className="mb-4">
                     <label className="mb-2.5 block font-medium text-left text-black dark:text-white">
                         monto 
@@ -87,7 +144,7 @@ function FormModal({payment}) {
                     />
                 </div>
 
-            <button onClick={()=>{}} className='p-3 rounded-sm bg-primary text-white'>finalizar</button>
+            <button onClick={onClick} className='p-3 rounded-sm bg-primary text-white'>finalizar</button>
     </form>
    </>
   )

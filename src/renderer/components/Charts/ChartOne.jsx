@@ -1,13 +1,16 @@
 //import { ApexOptions } from 'apexcharts';
 import React, { useEffect, useState } from 'react';
 import ReactApexChart from 'react-apexcharts';
+import { getYearPaymentsTotalAmountDate } from '../../pages/Payments/funcs';
+
+
 const options = {
   legend: {
     show: false,
     position: 'top',
     horizontalAlign: 'left',
   },
-  colors: ['#3C50E0', '#80CAEE'],
+  colors: ['#3C50E0', '#A5D6A7','#FFEB3B'],
   chart: {
     fontFamily: 'Satoshi, sans-serif',
     height: 335,
@@ -43,9 +46,14 @@ const options = {
       },
     },
   ],
+ 
   stroke: {
-    width: [2, 2],
-    curve: 'straight',
+    width: [3, 3,3],
+    curve: 'smooth',
+     // Cambié a 'smooth' para que la curva del gráfico sea más fluida
+  },
+  fill: {
+    opacity: 1, // Esto elimina el área de fondo
   },
   // labels: {
   //   show: false,
@@ -63,12 +71,21 @@ const options = {
     },
   },
   dataLabels: {
-    enabled: false,
+    enabled: true, // Habilitamos los data labels
+    style: {
+      fontSize: '15px', // Tamaño de la fuente
+      colors:  ['#3C50E0', '#A5D6A7','#FFB74D'] // Color del texto de las etiquetas
+    },
+    formatter: function (val) {
+      // Formatear número con punto cada 3 dígitos
+      const formattedValue = val.toLocaleString('es-ES'); // 'es-ES' para formato con punto en miles
+      return '$'+(formattedValue >= 1000000 ? (formattedValue / 1000000).toFixed(1) + 'M' : formattedValue);
+    },
   },
   markers: {
     size: 4,
     colors: '#fff',
-    strokeColors: ['#3056D3', '#80CAEE'],
+    strokeColors: ['#3056D3', '#80CAEE','#3056D3'],
     strokeWidth: 3,
     strokeOpacity: 0.9,
     strokeDashArray: 0,
@@ -110,7 +127,9 @@ const options = {
         if (value >= 1000000) {
           return (value / 1000000).toFixed(1) + 'M'; // Muestra en millones
         }
-        return value; // De lo contrario, muestra el valor original
+        const formattedValue = value.toLocaleString('es-ES'); // 'es-ES' para formato con punto en miles
+        return '$'+(formattedValue >= 1000000 ? (formattedValue / 1000000).toFixed(1) + 'M' : formattedValue);
+      // De lo contrario, muestra el valor original
       },
     },
   },
@@ -122,20 +141,26 @@ const ChartOne = () => {
     series: [
       {
         name: 'Ganancia Neta',
-        data: [123, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        data: [],
       },
 
       {
         name: 'Ganancia Bruta',
-        data: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        data: [140000,360000],
+      },
+      {
+        name: 'Ganancia Esperada',
+        data: [250000,450000],
       },
     ],
   });
 
   function setMonthValues(r){
 
-    const netMonths =[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-    const bruteMonths=[0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    const netMonths =[0,]
+    const bruteMonths=[0,]
+
+
 
     for (const month of r) {
       console.log(month)
@@ -147,37 +172,47 @@ const ChartOne = () => {
     }
 
     console.log(netMonths)
-
+    console.log(bruteMonths)
     return {
       netMonths,
       bruteMonths
     }
   }
 
-  /* useEffect(() => {
+ useEffect(() => {
     
     const init =async()=>{
 
-      const r = await paymentsModel.getMonthsGains()
-      console.log(r)
-      const gains = setMonthValues(r)
+      const {data,expected} = await getYearPaymentsTotalAmountDate()
+      console.log("data:----------------------------->",data)
+      console.log("expected:----------------------------->",expected)
+      const gains = setMonthValues(data)
+      
+      const expectedGains = setMonthValues(expected)
+      console.log("expectedGains:----------------------------->",expectedGains)
+      //console.log("expected:----------------------------->",expected)
 
-      console.log(gains)
-      setState({
+    console.log("gains:----------------------------->",gains)
+       setState({
         series: [
           {
             name: 'Ganancia Neta',
             data: gains.netMonths,
           },
-    
           {
             name: 'Ganancia Bruta',
             data: gains.bruteMonths,
           },
+           {
+            name: 'Ganancia Esperada',
+            data: expectedGains.bruteMonths,
+          }, 
         ],
-      })
+      }) 
 
-      console.log(state) 
+        /*  
+
+      */
     }
     
     init()
@@ -186,33 +221,43 @@ const ChartOne = () => {
     }
   }, [])
   
-  const handleReset = () => {
+/*   const handleReset = () => {
     setState((prevState) => ({
       ...prevState,
     }));
-  }; */
+  };  */
  // handleReset;
 
   return (
-    <div className="col-span-12 rounded-sm border border-stroke bg-white px-5 pt-7.5 pb-5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:col-span-8">
-      <div className="flex flex-wrap items-start justify-between gap-3 sm:flex-nowrap">
-        <div className="flex w-full flex-wrap gap-3 sm:gap-5">
-          <div className="flex min-w-47.5">
+    <div className="col-span-12 rounded-sm border border-stroke bg-white px-5 pt-7.5 pb-5 shadow-default dark:border-strokedark dark:bg-boxdark sm:px-7.5 xl:col-span-12">
+      <div className="flex  items-start justify-between gap-3 ">
+        <div className="flex w-full flex-wrap gap-2 sm:gap-5">
+          <div className="flex ">
             <span className="mt-1 mr-2 flex h-4 w-full max-w-4 items-center justify-center rounded-full border border-primary">
               <span className="block h-2.5 w-full max-w-2.5 rounded-full bg-primary"></span>
             </span>
             <div className="w-full">
               <p className="font-semibold text-primary">Ganancia Neta</p>
-              <p className="text-sm font-medium">12.04.2022 - 12.05.2022</p>
+              <p className="text-sm font-medium">{}</p>
             </div>
           </div>
           <div className="flex min-w-47.5">
             <span className="mt-1 mr-2 flex h-4 w-full max-w-4 items-center justify-center rounded-full border border-secondary">
-              <span className="block h-2.5 w-full max-w-2.5 rounded-full bg-secondary"></span>
+              <span className="block h-2.5 w-full max-w-2.5 rounded-full bg-success"></span>
             </span>
             <div className="w-full">
-              <p className="font-semibold text-secondary">Ganancia Bruta</p>
-              <p className="text-sm font-medium">12.04.2022 - 12.05.2022</p>
+              <p className="font-semibold text-success">Ganancia Bruta</p>
+              <p className="text-sm font-medium">{}</p>
+            </div>
+          </div>
+
+          <div className="flex min-w-47.5">
+            <span className="mt-1 mr-2 flex h-4 w-full max-w-4 items-center justify-center rounded-full border border-secondary">
+              <span className="block h-2.5 w-full max-w-2.5 rounded-full bg-warning"></span>
+            </span>
+            <div className="w-full">
+              <p className="font-semibold text-warning">Ganancia Esperada</p>
+              <p className="text-sm font-medium">{}</p>
             </div>
           </div>
         </div>
@@ -226,7 +271,7 @@ const ChartOne = () => {
         </div>
       </div>
 
-      <div>
+     
         <div id="chartOne" className="-ml-5">
           <ReactApexChart
             options={options}
@@ -235,7 +280,7 @@ const ChartOne = () => {
             height={350}
           />
         </div>
-      </div>
+      
     </div>
   );
 };

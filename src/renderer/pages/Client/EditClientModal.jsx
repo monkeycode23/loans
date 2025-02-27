@@ -2,7 +2,13 @@
 import React,{useState,useEffect} from 'react'
 import Modal,{ useModal } from '../../components/Modal'
 import { useNotification } from '../../components/Notifications'
+import { setClient,updateClient } from '../../redux/reducers/clients'
+import {setContactInformation,setFinancialInformation,setBasicInformation, } from '../../redux/reducers/information'
 
+import { useSelector,useDispatch } from 'react-redux'
+
+
+import Tabs from '../../components/Tabs'
 
 
 
@@ -21,8 +27,6 @@ function EditModalClient({button}) {
   )
 }
 
-import { useSelector,useDispatch } from 'react-redux'
-import { setClient } from '../../redux/reducers/clients'
 
 function  EditClientForm({payment,button}){
 
@@ -30,6 +34,7 @@ function  EditClientForm({payment,button}){
     const dispatch = useDispatch()
     const {setNotification,showNotification} = useNotification()
     const {toggleModal} = useModal()
+    const information = useSelector((state)=>state.information)
   // console.log(payment)
 
     const [formData,setFormData] = useState({
@@ -38,27 +43,27 @@ function  EditClientForm({payment,button}){
             error:"",
         },
         name:{
-            value:client.name,
+            value:information.basicInformation.name,
             error:"",
         },
         lastname:{
-            value:client.lastname,
+            value:information.basicInformation.lastname,
             error:"",
         },
         email:{
-            value:client.email,
+            value:information.contactInformation.email,
             error:"",
         },
         phonenumber:{
-            value:client.phonenumber,
+            value:information.contactInformation.phonenumber,
             error:"",
         },
         cbu:{
-            value:client.cbu,
+            value:information.financialInformation.cbu,
             error:"",
         },
         alias:{
-            value:client.alias,
+            value:information.financialInformation.alias,
             error:"",
         }
     })
@@ -112,7 +117,118 @@ function  EditClientForm({payment,button}){
         <div>
             <form onSubmit={(e)=>e.preventDefault()}>
 
-                <div className="mb-4">
+                <Tabs tabs={[
+                    {
+                        name:"info basica",
+                        content:(<BasicInforation  formData={formData} setField={setField}/>)
+                    },
+                    {
+                        name:"info contacto",
+                        content:(<ContactInformation formData={formData} setField={setField}/>)
+                    },
+                    {
+                        name:"billetera vitual",
+                        content:(<VirtualWallet formData={formData} setField={setField}/>)
+                    },
+                    
+                ]}></Tabs>
+            <button
+            onClick={async(e)=>{
+    
+
+                await window.database.models.Clients.updateClient({
+                    id:client.id,
+                    nickname:formData.nickname.value,
+                    
+                })
+
+                const info = await window.database.models.Information.getInformation({
+                    where:`client_id = '${client.id}'`
+                })
+
+                console.log("info-------------->",info)
+
+                if(info.length>0){
+                    await window.database.models.Information.updateInformationFilter({
+                    where:`client_id = '${client.id}'`,
+                    data:{
+                        name:formData.name.value,
+                        lastname:formData.lastname.value,
+                        email:formData.email.value,
+                        phone:formData.phonenumber.value,
+                        alias:formData.alias.value,
+                        cbu:formData.cbu.value
+                    }
+
+                    })
+                }else{
+                    await window.database.models.Information.createInformation({
+                        client_id:client.id,
+                        name:formData.name.value,
+                        lastname:formData.lastname.value,
+                        email:formData.email.value,
+                        phone:formData.phonenumber.value,
+                        alias:formData.alias.value,
+                        cbu:formData.cbu.value
+                    })
+                }
+                    
+                dispatch(updateClient({
+                    ...client,
+                    nickname:formData.nickname.value,
+                }))
+                dispatch(setBasicInformation({
+                    name:formData.name.value,
+                    lastname:formData.lastname.value,
+                }))
+                dispatch(setContactInformation({
+                    email:formData.email.value,
+                    phonenumber:formData.phonenumber.value,
+                }))
+                dispatch(setFinancialInformation({
+                    alias:formData.alias.value,
+                    cbu:formData.cbu.value
+                }))
+                    toggleModal()
+                    
+                    setNotification({
+                        type:"success",
+                        message:"Cliente actualizado con exito"
+                    })
+                    showNotification()
+                   // console.log(payment)
+                   /*  setClient({
+                        ...client,
+                        nickname:formData.nickname.value,
+                        name:formData.name.value,
+                        lastname:formData.lastname.value,
+                        email:formData.email.value,
+                        phonenumber:formData.phonenumber.value,
+                        alias:formData.alias.value,
+                        cbu:formData.cbu.value,
+                    }) */
+                    
+                }
+            }
+            className='p-3 bg-primary text-white'>
+                editar
+            </button>
+            </form>
+        </div>
+    )
+}
+
+
+
+export default EditModalClient
+
+
+
+
+const BasicInforation = ({formData,setField}) => {
+    return (
+        <>
+        <div className="mb-4">
                     <label className="mb-2.5 block font-medium text-left text-black dark:text-white">
                         Nickname (apodo)
                     </label>
@@ -166,7 +282,16 @@ function  EditClientForm({payment,button}){
                     </div>
                 </div>
 
-                <div className="mb-4">
+
+        </>
+    )
+}
+
+const ContactInformation = ({formData,setField}) => {
+    return (
+       <>
+       
+       <div className="mb-4">
                     <label className="mb-2.5 block font-medium text-left text-black dark:text-white">
                         Email
                     </label>
@@ -199,7 +324,14 @@ function  EditClientForm({payment,button}){
                 </div>
 
 
-                <div className="mb-4">
+       </>
+    )
+}
+
+const VirtualWallet = ({formData,setField}) => {
+    return (
+       <>
+        <div className="mb-4">
                     <div className='flex'>
                         <div className='w-2/4'>
                             <label className="mb-2.5 block font-medium text-left text-black dark:text-white">
@@ -236,94 +368,12 @@ function  EditClientForm({payment,button}){
 
                     </div>
                 </div>
-
-            <button
-            onClick={(e)=>{
-    
-                    clientsModel.editClient(client.id,{
-                        ...client,
-                        nickname:formData.nickname.value,
-                        name:formData.name.value,
-                        lastname:formData.lastname.value,
-                        email:formData.email.value,
-                        phonenumber:formData.phonenumber.value,
-                        alias:formData.alias.value,
-                        cbu:formData.cbu.value,
-                    })
-                    
-                    toggleModal()
-                    setNotification({
-                        type:"success",
-                        message:"Cliente actualizado con exito"
-                    })
-                    showNotification()
-                   // console.log(payment)
-                    setClient({
-                        ...client,
-                        nickname:formData.nickname.value,
-                        name:formData.name.value,
-                        lastname:formData.lastname.value,
-                        email:formData.email.value,
-                        phonenumber:formData.phonenumber.value,
-                        alias:formData.alias.value,
-                        cbu:formData.cbu.value,
-                    })
-                    
-                }
-            }
-            className='p-3 bg-primary text-white'>
-                editar
-            </button>
-            </form>
-        </div>
+       </>
     )
 }
 
 /* 
 
-function Amount() {
-    
-  return (
-    <div className="mb-4">
-    <h3 className=" text-xl font-semibold p-3  pb-7 block text-black dark:text-white text-center ">
-        Cunato dinero  deseas prestar?
-    </h3>
-    <div className="relative">
-        <input
-            step={1000}
-            name="monto"
-            type="number"
-            min={5000}
-            placeholder="Ingresa el monto del prestamo"
-            className={`w-full rounded-lg border border-stroke  focus:text-black  bg-transparent py-4 pl-6 pr-10 text-black outline-none focus:border-primary focus-visible:shadow-none dark:border-form-strokedark dark:bg-form-input dark:text-white dark:focus:border-primary`}
-            onChange={ (e)=>setField({type:"set",field:"monto",value:e.target.value})}
-            defaultValue={10000}
-            value={formData.monto.value}
-        />
+               
 
-        <div className='flex  mt-5 mb-5 gap-2'>
-            {
-                montos.map((e) => <span
-
-                    onClick={(e) => {
-                       setField({type:"set",field:"monto",value:Number(e.target.innerText)})  
-                    }}
-                    className='text-sm p-2  border border-stroke  text-center cursor-pointer rounded-lg'
-                >
-                    {e}</span>)
-            }
-        </div>
-
-        <p className="text-center text-red ">
-    {
-      formData.monto.error ? formData.monto.error : ""
-    }
-  </p>
-
-    </div>
-</div>
-  )
-}
-
-export default EditModalPayment */
-export default EditModalClient
+*/

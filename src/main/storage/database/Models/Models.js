@@ -49,6 +49,7 @@ class Models {
        console.log("filter:----------------------------->",filter)
         const query=`SELECT ${filter.select ? filter.select : '*'} FROM ${this.tableName} ${filter.joins ? filter.joins : ''} 
             ${filter.where ? `WHERE ${filter.where}` : ''} 
+            ${filter.groupBy ? `GROUP BY ${filter.groupBy} ` : ''} 
             ${filter.orderBy ? `ORDER BY ${filter.orderBy} ` : ''} 
 
             ${filter.limit ? `LIMIT ${filter.limit}` : ''}
@@ -62,8 +63,25 @@ class Models {
     }
     update(data){
         return this.db.query(`UPDATE ${this.tableName} SET
-             ${Object.keys(data).map(key => `${key} = '${data[key]}'`).join(',')}
+             ${Object.keys(data).map(key => `${key} = ${data[key]=='NULL' ? null : `'${data[key]}'`}`).join(',')}
         WHERE id = '${data.id}'`,[],{type:"run"})
+    }
+    updateMany(data){
+        return this.db.query(`UPDATE ${this.tableName} SET
+             ${Object.keys(data).map(key => `${key} = ${data[key]=='NULL' ? null : `'${data[key]}'`}`).join(',')}
+        WHERE id IN (${data.ids.map(id => `'${id}'`).join(',')})`,
+        
+        [],{type:"run"})
+    } 
+
+     
+    updateFilter(filter){
+
+        const query = `UPDATE ${this.tableName} SET ${Object.keys(filter.data).map(key => `${key} = ${filter.data[key]=='NULL' ? null : `'${filter.data[key]}'`}`).join(',')}
+        ${filter.where ? ` WHERE ${filter.where}` : ''}`
+
+        console.log("query:----------------------------->",query)
+        return this.db.query(query,[],{type:"run"})
     }
     
     delete(id){
@@ -88,7 +106,7 @@ class Models {
     }
 
     getLastId(){
-        return this.db.query(`SELECT MAX(id) as id FROM ${this.tableName}`)
+        return this.db.query(`SELECT id as id FROM ${this.tableName} ORDER BY id DESC LIMIT 1`)
     }
 }
 

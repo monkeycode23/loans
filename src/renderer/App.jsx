@@ -14,6 +14,7 @@ import Settings from './pages/Settings';
 import Calendar from './pages/Calendar';
 import Payments from './pages/Payments';
 
+
 import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
@@ -23,7 +24,7 @@ function App() {
 
   useEffect(()=>{
     
-    navigate('/payments')
+    navigate('/dashboard')
     
   },[])
 

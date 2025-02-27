@@ -26,7 +26,7 @@ const ClientList = () => {
     <>
     
       {clients.length>0 ?
-       (<div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-1 ">
+       (<div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-1 mt-10 ">
 
         {
           clients.map((client) =>{
@@ -92,7 +92,7 @@ export const ClientCard = ({ client }) => {
       </div>*/}
 
       {/* Action Button */}
-      {client.expired > 0 ? (<Tag
+      {client.total_expired_payments > 0 ? (<Tag
       type="danger"
 
       label={"deudor"}
@@ -103,7 +103,7 @@ export const ClientCard = ({ client }) => {
        
        
    
-      {client.incomplete>0 ? (<Tag
+      {client.total_incomplete_payments>0 ? (<Tag
       type="warning"
 
       label={"p.incompletos "}

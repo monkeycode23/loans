@@ -8,6 +8,7 @@ import SelectGroupOne from "../../../components/Forms/SelectGroup/SelectGroupOne
 import { useSelector,useDispatch } from "react-redux";
 import { createPayments } from "../funcs";
 import { setLoans,addLoan } from "../../../redux/reducers/loans";
+import {setPaymentsCount} from "../../../redux/reducers/payments"
 const Step6 = () => {
 
     const { formData, disableNext, nextStep, handleChange, enableNext, registerOnNext, registerOnBack, validate, setField,goToStep } = useGuide()
@@ -17,6 +18,7 @@ const Step6 = () => {
     const {showModal,toggleModal} = useModal()
     const {setNotification,showNotification} = useNotification()
     const totalLoans = useSelector((state) => state.loans.totalLoans)
+    const paymentsCount = useSelector((state) => state.payments.paymentsCount)
     useEffect(() => {
   
       enableNext()
@@ -67,13 +69,17 @@ const Step6 = () => {
               }) 
 
               const payments = await createPayments(loan)
-     
+              console.log("payments:----------------------------->",payments)
               console.log("loan:----------------------------->",loan)
               dispatch(addLoan(loan))
               // console.log(insert)
              /*  */
     
           /*      */
+          dispatch(setPaymentsCount({
+            ...paymentsCount,
+            pending:formData.installments.value,
+          }))
           toggleModal();
     
               setNotification({

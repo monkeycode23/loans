@@ -40,6 +40,8 @@ export const deleteClientDb = async (clientId) => {
    }
 }
 
+
+
 export const getClientPaymentsCount = async (clientId) => {   
    try {
 
@@ -59,7 +61,13 @@ export const getClientPaymentsCount = async (clientId) => {
            COUNT(CASE 
              WHEN payments.status = 'expired' THEN 1
              ELSE NULL
-           END) AS expired`,
+           END) AS expired,
+           
+           COUNT(CASE 
+             WHEN payments.status = 'incomplete' THEN 1
+             ELSE NULL
+           END) AS incomplete`,
+           
        
          where: `clients.id = ${clientId}`, // Asegúrate de que clientId sea un valor numérico o escapado adecuadamente
        
@@ -128,6 +136,33 @@ export const getClientLoans = async (clientId,filter) => {
    }
 }
 
+export const getClientNotes = async (clientId) => {
+   try {
+      const data = await window.database.models.Notes.getNotes({
+         select: `*`,
+         where: `client_id = ${clientId}`,
+         
+      })
+      return data[0].notes
+   } catch (error) {
+      console.log("error:----------------------------->",error)
+      return []
+   }
+}
+
+export const getClientInformation = async (clientId) => {
+   try {
+      const data = await window.database.models.Information.getInformation({
+         select: `*`,
+         where: `client_id = ${clientId}`,
+         limit: 1
+      })
+      return data[0]
+   } catch (error) {
+      console.log("error:----------------------------->",error)
+      return []
+   }
+}  
 
 
 export const insertLoan = async (loan) => {

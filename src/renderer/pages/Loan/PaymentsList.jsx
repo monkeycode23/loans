@@ -1,22 +1,26 @@
 import React, { useState, useEffect } from "react";
 
+//components
 import { Link } from "react-router-dom";
-import { DeleteIcon, Eye, MoneyBillAlt, NoteIcon, PaymentIcon } from "../../components/Icons";
-
 import EditModalPayment from "./EditModalPayment";
 import DropdownDefault from "../../components/Dropdowns/DropdownDefault";
-
-import { useNotification } from "../../components/Notifications";
-
-
-
-import { formatDateDifference, excludeProperties } from "../../common/funcs";
 import PaymentModal from "./PaymentModal";
+import { DeleteIcon, Eye, MoneyBillAlt, NoteIcon, PaymentIcon, NotesIcon } from "../../components/Icons";
 
+
+//hooks
+import { useNotification } from "../../components/Notifications";
 import { useSelector   } from "react-redux";
 import { deletePayment } from "../../redux/reducers/payments";
-import { setLoan } from "../../redux/reducers/loans";
 import { useDispatch } from "react-redux";
+
+//funcions
+import { setLoan } from "../../redux/reducers/loans";
+import { getNotes,payPayment } from "./funcs"
+import { setBruteGains,setNetGains,updatePayment } from "../../redux/reducers/payments"
+import { formatDateDifference, excludeProperties } from "../../common/funcs";
+//import { setNotes } from "../../redux/reducers/notes"
+
 
 export const PaymentsList = ({  }) => {
 
@@ -57,12 +61,6 @@ export const PaymentsList = ({  }) => {
 };
 
 
-
-
-import { getNotes,payPayment } from "./funcs"
-import { setBruteGains,setNetGains,updatePayment } from "../../redux/reducers/payments"
-
-
 export const PaymentCard = ({ payment }) => {
 
 
@@ -73,7 +71,8 @@ export const PaymentCard = ({ payment }) => {
   const loan = useSelector(state=>state.loans.loan)
   const bruteGains = useSelector(state=>state.payments.bruteGains)
   const netGains = useSelector(state=>state.payments.netGains)
-
+  //const notes = useSelector(state=>state.notes.notes)
+  const [notes,setNotes] = useState('')
 
   function stateLabel(status) {
     if (status == "paid") return "Pagado"
@@ -82,9 +81,21 @@ export const PaymentCard = ({ payment }) => {
     else if (status == "incomplete") return "Incompleto"
   }
 
+  useEffect(()=>{
+    
+    async function init(){
+
+      const _nootes = await window.database.models.Notes.getNote({
+        where:`payment_id = ${payment.id}`
+      })
+
+     // setNotes(_nootes[0].notes)
+      //dispatch(setNotes(_nootes[0].notes))
+    }
+    init()
+  },[payment])
 
 
-  
   const pay=async (e) => {
 
     const  isCompleted = await payPayment(id,loan)
@@ -151,7 +162,15 @@ export const PaymentCard = ({ payment }) => {
         {/* agregar nota button */}
         <AddNoteModalPayment payment={payment}
           button={<button
+            onClick={async ()=>{
 
+              /* const _note = await window.database.models.Notes.getNote({
+                where:`payment_id = ${payment.id}`
+              })
+              dispatch(setNotes(_note[0].notes))
+
+              console.log("payment---a>>",payment) */
+            }}
             className="flex w-full items-center gap-2 rounded-sm px-4 py-1.5 text-left text-sm hover:bg-gray dark:hover:bg-meta-4">
             <NoteIcon payment={payment} />
             agregar nota
@@ -287,7 +306,7 @@ export const PaymentCard = ({ payment }) => {
         <StateTag state={status}></StateTag>
 
         {
-          paid_date ? 
+          paid_date && paid_date != "NULL" ? 
           
           new Date(paid_date)< new Date(date) ? (<Tag type={"success2"}  title={`Pagada el (${paid_date})  adelantado a la fecha de pago`} label={"P. adelan.."}></Tag>)
           : new Date(paid_date)> new Date(date) ? (<Tag title={"Pagada el ("+paid_date+") Fuera de fecha de pago"} type={"danger2"} label={"P. Atras.."}></Tag>) : (<Tag title="Pagada dentro de la fecha de pago" type={"success3"} label={"P. en fecha"}></Tag>)
@@ -295,7 +314,9 @@ export const PaymentCard = ({ payment }) => {
         }
 
         {/* {state=="expired"? payed_date!=null ?  (): ""} */}
-
+             {/*  {
+                notes.length ? (  <Tag  type="primary" label={"Notas"} icon={<NotesIcon width={8} height={8}></NotesIcon>}></Tag>) : (<></>)
+              } */}
         {/*  <Link to={"/prestamos/"+id}>ver prestamo</Link> */}
       </div>
     </div>

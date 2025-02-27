@@ -4,18 +4,16 @@ const logger = require('./logger.js');
 const {checkForUpdates} = require('./updater');
 const dotenv = require('dotenv');
 
+
+
 dotenv.config();
 
  ipcMain.on('check-for-updates', () => {
     checkForUpdates();
 }); 
  
+ 
 
-
-
-
-
-  
   const DatabaseIpcMain = require('./ipcs/database/ipcmain');
   ipcMain.handle('database', DatabaseIpcMain);
 
@@ -29,6 +27,25 @@ ipcMain.handle('download-csv', async (event) => {
 
   fs.writeFileSync(filePath, csvData);
   return filePath; // Devuelve la ruta del archivo
+});
+
+
+const {parseDatabase} = require('./helpers/parseDatabase');
+
+// Manejar un evento IPC desde el renderer
+ipcMain.handle('upload-file', async(event, filePath) => {
+  console.log(`Archivo recibido desde el renderer: ${filePath}`);
+  // Aquí puedes procesar el archivo, guardarlo, etc.
+ 
+  async function name(event,filePath) {
+    const r = await parseDatabase(event,filePath);
+    console.log("r------------>",r);
+  }
+  await name(event,filePath);
+
+  //const filePath = path.join(downloadsPath, 'datos.csv');
+
+  //event.reply('file-received', `Archivo ${filePath} recibido correctamente`);
 });
 
 
@@ -49,13 +66,13 @@ ipcMain.handle('download-csv', async (event) => {
         enableRemoteModule: true // Deprecado en versiones nuevas de Electron
       }
     });
-
+ 
     // Determina qué cargar basado en el ambiente
     if (!app.isPackaged) {
       // Ambiente de desarrollo - Carga desde webpack dev server
       mainWindow.loadURL('http://localhost:3000');
       // Abre las herramientas de desarrollo
-      mainWindow.webContents.openDevTools();
+     // mainWindow.webContents.openDevTools();
       logger.info('Cargando desde servidor de desarrollo');
     } else {
       // Ambiente de producción - Carga el archivo compilado

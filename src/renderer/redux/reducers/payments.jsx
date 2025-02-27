@@ -9,6 +9,12 @@ const initialState = {
     bruteGains: 0,
     expiredPayments: 0,
     netGains: 0,
+    paymentsCount: {
+        pending: 0,
+        paid: 0,
+        incomplete: 0,
+        expired: 0,
+    },
 }
 
 const paymentsSlice = createSlice({
@@ -22,6 +28,9 @@ const paymentsSlice = createSlice({
                     ...action.payload,
                 ]
             
+        },
+        setPaymentsCount: (state, action) => {
+            state.paymentsCount = action.payload;
         },
         setPayment: (state, action) => {
             state.payment = action.payload;
@@ -54,5 +63,5 @@ const paymentsSlice = createSlice({
     },
 })  
 
-export const {deletePayment, setPayments, setTotalPayments, setLoading, setError, updatePayment, setBruteGains, setExpiredPayments, setNetGains } = paymentsSlice.actions;
+export const { deletePayment, setPayments, setTotalPayments, setLoading, setError, updatePayment, setBruteGains, setExpiredPayments, setNetGains, setPaymentsCount   } = paymentsSlice.actions;
 export default paymentsSlice.reducer;

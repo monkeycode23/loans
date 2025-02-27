@@ -1,6 +1,8 @@
 import React, {useEffect, useState } from 'react';
 import ReactApexChart from 'react-apexcharts';
-import { getMonthStartEnd } from '../../common/funcs';
+import { getMonthStartEnd ,formatAmount} from '../../common/funcs';
+import { getPaymentsStatusDate } from '../../pages/Payments/funcs';
+import { getMonday,getSunday,getYearStartEnd,getWeekStartEnd } from '../../common/funcs';
 
 const options = {
   chart: {
@@ -54,7 +56,6 @@ const ChartThree= ({payments}) => {
       pending:10,
       incomplete:1,
      })
-    //const {stateWeekPayments,setStateWeekPayments} = useDash()
   
   
     const [state, setState] = useState({
@@ -64,37 +65,67 @@ const ChartThree= ({payments}) => {
     ],
   });
 
-/*   async function  getPaymentsData(period){
+  async function  getPaymentsData(period){
 
     console.log(period)
     const d = new Date()
-
+    const week = getWeekStartEnd(d)
+    const year = getYearStartEnd(d.getFullYear(d.getFullYear()))
+    const month =getMonthStartEnd(d.getMonth()+1)
+    console.log("month:----------------------------->",month)
     let payments 
-    if(period =="weekly")payments = await paymentsModel.getPaymentsWeekState()
-    if(period == "monthly")payments = await paymentsModel.getPaymentsMonthState(d.getMonth()+1)
+    if(period =="weekly")payments = await getPaymentsStatusDate({start:week.start,end:week.end})
+    if(period == "monthly")payments = await getPaymentsStatusDate({start:month.start,end:month.end})
+    if(period == "year")payments = await getPaymentsStatusDate({start:year.start,end:year.end})
+      return parseData(payments)
+    
+  } 
 
-    const p={
-      payed:0,
-      expired:0,
+  const parseData = (data) => {
+    
+     const p={
+      paid:0,
       pending:0,
+      expired:0,
       incomplete:0,
      }
-    for (const row of payments) {
-      p[row.state] = row.total_payments
+     console.log("data:----------------------------->",data)
+    for (const row of data) {
+      console.log("row:----------------------------->",row)
+      p[row.status] = row.total_payments
     }
 
+    console.log("p:----------------------------->",p)
     return  [ 
-        p.payed,
-       
+        p.paid,
         p.pending,
         p.expired,
         p.incomplete
       ]
-    
-  } */
-
+  }
   useEffect(() => {
 
+
+      const init = async () => {
+
+        const start = getMonday(new Date())
+        const end = getSunday(new Date())
+        const data = await getPaymentsStatusDate({start,end})
+
+        console.log("data:----------------------------->",data)
+
+
+        const series = parseData(data)
+        setState((prevState) => {
+          return {
+            ...prevState,
+            series: series
+          }
+        })
+
+      }
+
+      init()
   /*  const init = async (params) => {
 
     const sPayments = await paymentsModel.getPaymentsWeekState()
@@ -152,30 +183,52 @@ const ChartThree= ({payments}) => {
    const onChange=async (e)=>{
 
     
-    let r
+  let r,series
+
     switch (e.target.value) {
       case "monthly":
         
-       r = await getPaymentsData("monthly")
+        series = await getPaymentsData("monthly")
+       console.log("r:----------------------------->",r)
+      
+      console.log("series:----------------------------->",series)
         setState((prevState)=>{
           return {
             ...prevState,
-            series: r
+            series: series
           }
         })
 
         break;
         case "weekly":
         
-       r = await getPaymentsData("weekly")
+       series = await getPaymentsData("weekly")
+       console.log("r:----------------------------->",r)
+      
+        console.log("series:----------------------------->",series)
           setState((prevState)=>{
             return {
               ...prevState,
-              series: r
+              series: series
             }
           })
   
           break;
+
+          case "year":
+        
+          series = await getPaymentsData("year")
+          console.log("r:----------------------------->",r)
+         
+           console.log("series:----------------------------->",series)
+             setState((prevState)=>{
+               return {
+                 ...prevState,
+                 series: series
+               }
+             })
+     
+             break;
     
       default:
         break;
@@ -206,6 +259,9 @@ return (
               </option>
               <option value="monthly" className="dark:bg-boxdark">
                Mensual
+              </option>
+              <option value="year" className="dark:bg-boxdark">
+                Anual
               </option>
             </select>
             <span className="absolute right-3 top-1/2 z-10 -translate-y-1/2">
@@ -247,7 +303,7 @@ return (
           <div className="flex w-full items-center">
             <span className="mr-2 block h-3 w-full max-w-3 rounded-full bg-[#7BD77E]"></span>
             <p className="flex w-full justify-between text-sm font-medium text-black dark:text-white">
-              <span> Pagados </span>
+              <span> Pagados {formatAmount(state.series[0])} </span>
             {/*   <span>{percentages.payed} %</span> */}
             </p>
           </div>
@@ -256,7 +312,7 @@ return (
           <div className="flex w-full items-center">
             <span className="mr-2 block h-3 w-full max-w-3 rounded-full bg-[#6577F3]"></span>
             <p className="flex w-full justify-between text-sm font-medium text-black dark:text-white">
-              <span> Pendientes </span>
+              <span> Pendientes {formatAmount(state.series[1])} </span>
             {/*   <span>{percentages.pending} %</span> */}
             </p>
           </div>
@@ -265,7 +321,7 @@ return (
           <div className="flex w-full items-center">
             <span className="mr-2 block h-3 w-full max-w-3 rounded-full bg-[#FF6666]"></span>
             <p className="flex w-full justify-between text-sm font-medium text-black dark:text-white">
-              <span> Vencidos </span>
+              <span> Vencidos {formatAmount(state.series[2])} </span>
               {/* <span> {percentages.expired} %</span> */}
             </p>
           </div>
@@ -274,7 +330,7 @@ return (
           <div className="flex w-full items-center">
             <span className="mr-2 block h-3 w-full max-w-3 rounded-full bg-[#FFCC66]"></span>
             <p className="flex w-full justify-between text-sm font-medium text-black dark:text-white">
-              <span> Incompletos </span>
+                <span> Incompletos {formatAmount(state.series[3])} </span>
              {/*  <span> {percentages.incomplete} %</span> */}
             </p>
           </div>

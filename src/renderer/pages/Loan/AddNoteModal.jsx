@@ -19,32 +19,38 @@ function AddNoteModalPayment({payment,button}) {
   )
 }
 
-
+import { useSelector,useDispatch } from "react-redux"
+import { setNotes } from "../../redux/reducers/notes"
 import { getNotes } from "./funcs"
 
 function  EditPaymentForm({payment,button}){
 
     const {setNotification,showNotification} = useNotification()
     const {toggleModal} = useModal()
-    const [notes,setNotes] = useState([])
-
-   useEffect(()=>{
-    const init = async ()=>{
-        const notes = await getNotes(payment.id,"payment")
-       // console.log("notes---a>>",notes)
-        setNotes(notes)
-    }
-    init()
-   },[])
+   // const [notes,setNotes] = useState([])
+    const notes = useSelector(state=>state.notes.notes)
+    const dispatch = useDispatch()
 
     const [formData,setFormData] = useState({
         
         notes:{
-            value:notes.map((e)=>e.notes).join("\n"),
+            value:notes,
             error:"",
         },
         
     })
+
+
+   useEffect(()=>{
+    const init = async ()=>{
+       // const notes = await getNotes(payment.id,"payment")
+       // console.log("notes---a>>",notes)
+       // setNotes(notes)
+    }
+    init()
+   },[])
+
+   
 
     useEffect(() => {
       
@@ -116,22 +122,34 @@ function  EditPaymentForm({payment,button}){
 
             <button
             onClick={
-                ()=>{
+               async ()=>{
     
                    // console.log("Asdasd")
                     //console.log(formData)
-                    
-                    window.database.models.Notes.createNote({
-                        notes:formData.notes.value,
-                        payment_id:payment.id,
-                        
+
+                    const note = await window.database.models.Notes.getNote({
+                        where:`payment_id = ${payment.id}`
                     })
+
+                    if(note.length>0){
+                        await window.database.models.Notes.updateNote({
+                            id:note[0].id,
+                            notes:formData.notes.value,
+                        })
+                    }else{
+                        await window.database.models.Notes.createNote({
+                            notes:formData.notes.value,
+                            payment_id:payment.id,
+                            
+                        })
+                    }
                     /* paymentsModel.editPayment(payment.id,{ 
                         ...payment,  
                         notes:formData.notes.value,
                        
                     }) */
                     
+                    dispatch(setNotes(formData.notes.value))
                     toggleModal()
 
                     setNotification({
@@ -149,7 +167,7 @@ function  EditPaymentForm({payment,button}){
                 }
             }
             className='p-3 bg-primary text-white'>
-                editar
+                agregar
             </button>
             </form>
         </div>

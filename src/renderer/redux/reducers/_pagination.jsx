@@ -1,15 +1,19 @@
 import { createSlice } from '@reduxjs/toolkit';
 
+
 const initialState = {
     page: 1,
-    limit: 1,
+    limit: 15,
     totalPages: 1,
     search: "",
     count: 0,
     totalResults: 0,
-    
-    
-   
+    filter: {
+      search: "",
+      date:new Date(),
+      status: null,
+      id: null,
+    },
 }
 
 const paginationSlice = createSlice({
@@ -22,6 +26,9 @@ const paginationSlice = createSlice({
         setLimit: (state, action) => {
             state.limit = action.payload;
         },  
+        setFilter: (state, action) => {
+            state.filter = action.payload;
+        },
       setTotalPages: (state, action) => {
         state.totalPages = action.payload;
       },
@@ -40,7 +47,7 @@ const paginationSlice = createSlice({
     },
 })
 
-export const {  setPage, setLimit, setTotalPages, setSearch, setCount, setTotalResults } = paginationSlice.actions;
+export const {  setPage, setLimit, setTotalPages, setSearch, setCount, setTotalResults, setFilter } = paginationSlice.actions;
 export default paginationSlice.reducer;      
 
 

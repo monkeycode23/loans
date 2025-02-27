@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import ReactApexChart from 'react-apexcharts';
 
-
+import { getWeekPaymentsTotalAmountDate } from '../../pages/Payments/funcs';
+import { getWeekStartEnd, getLastWeeksStartEnd } from '../../common/funcs';
 const options = {
   colors: ['#3C50E0', '#80CAEE'],
   chart: {
@@ -78,8 +79,8 @@ const ChartTwo = ({payments}) => {
   const [state, setState] = useState({
     series: [
       {
-        name: 'amount',
-        data: [2,32,50, 212, 23, 1,0],
+        name: 'monto total',
+        data: [0, 0, 0, 0, 0, 0, 0],
       },
       {
         name: 'ganancia',
@@ -90,49 +91,64 @@ const ChartTwo = ({payments}) => {
   
   const [totalAmount, setTotalAmount] = useState(0)
 
- /*  useEffect(() => {
+  useEffect(() => {
     const init =async ()=>{
      
     
-      const r = await getData("current");
+      const data = await getData("current");
 
-      
-    setState({
+      console.log("asdasdasddata:----------------------------->",data)
+    const r = parseData(data)
+      console.log("asdasdasdadr:----------------------------->",r)
+      setState({
       series: [
         r.monto,
         r.ganancia
       ],
-    })
+    }) 
   
 
   }
 
 
-    //init()
+    init()
   
     return () => {}
-  }, [])   */
+  }, [])   
   
 
-  async function getData(period){
+ async function getData(period){
 
 
     let payweeks 
 
     if(period=="current"){
 
-    payweeks = await paymentsModel.getWeekPayments()
+      const {start,end} = getWeekStartEnd(new Date())
+
+    payweeks = await getWeekPaymentsTotalAmountDate({start,end})
+    console.log("payweeks:----------------------------->",payweeks)
   }
 
   if(period=="last"){
    // console.log("asasdasdasdasd")
+    const {start,end} = getLastWeeksStartEnd()
+    console.log("start:----------------------------->",start)
+    console.log("end:----------------------------->",end)
+   payweeks = await getWeekPaymentsTotalAmountDate({start,end})
 
-    payweeks = await paymentsModel.getLastWeekPayments()
-
-   
+    console.log("payweeks:----------------------------->",payweeks)
+    console.log("payweeks:----------------------------->",payweeks)
   }
     
-      const weekDays = {
+  return payweeks
+    
+  }
+
+
+  function parseData(data){
+
+    const weekDays = {
       mon:{
         totalAmount: 0,
         totalGains: 0
@@ -164,10 +180,10 @@ const ChartTwo = ({payments}) => {
       
     }
 
-    console.log(payweeks)
+    console.log("data:----------------------------->",data)
     let totalAmountGainsWeek=0;
     let bruteGains =0
-    for (const r of payweeks ) {
+    for (const r of data ) {
      // console.log(r)
       switch (Number(r.weekday)) {
         case 0:
@@ -253,18 +269,18 @@ const ChartTwo = ({payments}) => {
           weekDays.sun.totalGains],
       }
     }
-    
+   
   }
 
   async function onChange(e){
 
-    const r = await getData(e.target.value);
-
-    setState({
+    const data = await getData(e.target.value);
+    const r = parseData(data)
+     setState({
         series: [
           r.monto,
           r.ganancia
-        ]})
+        ]}) 
     }
 
     
@@ -274,7 +290,7 @@ const ChartTwo = ({payments}) => {
     <div className="col-span-12 rounded-sm border border-stroke bg-white p-7.5 shadow-default dark:border-strokedark dark:bg-boxdark xl:col-span-7">
       <div className="mb-4 justify-between gap-4 sm:flex">
         <div>
-          <h4 className="text-xl font-semibold text-black dark:text-white">
+          <h4 className="text-md font-semibold text-black dark:text-white">
             Ganancias netas ${formatAmount(totalAmount.netGains)} bruta  ${formatAmount(totalAmount.bruteGains)} de la semana
           </h4>
         </div>

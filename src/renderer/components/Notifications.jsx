@@ -41,7 +41,7 @@ const Notification = ({ children }) => {
      {
       popNoty ? (<div 
         className={`fixed bottom-5 right-5 px-6 py-4 rounded-lg shadow-lg z-50 text-white transition-all duration-500 transform ${
-          notification.type === "success" ? "bg-green-500" : "bg-red-500"
+          notification.type === "success" ? "bg-green-500" : notification.type === "error" ? "bg-danger" : notification.type === "warning" ? "bg-warning" : "bg-primary"
         }`}
       >
         <p>{notification.message}</p>

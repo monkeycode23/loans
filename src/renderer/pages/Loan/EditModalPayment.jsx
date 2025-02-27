@@ -180,7 +180,7 @@ function EditPaymentForm({ payment, button }) {
             }
 
             let paid_date = payment.status == "paid" && formData.status.value != "paid" ?
-             '': payment.paid_date;
+             'NULL': payment.paid_date;
 
              console.log("paiddddddddasd adat asdasd12",paid_date)
 

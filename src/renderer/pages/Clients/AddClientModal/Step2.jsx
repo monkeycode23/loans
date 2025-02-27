@@ -56,9 +56,9 @@ function Step2() {
 
               const client = await window.database.models.Clients.getClientLastId()
               
+              console.log("client-------------->",client)
               const information = {
-                client_id:client[0].id,
-                
+                id:client[0].id,
                 name:formData.name.value,
                 lastname:formData.lastname.value,
                 email:formData.email.value,

@@ -13,6 +13,8 @@ import  { EditIcon, UserIcon, StarIcon, PaymentIcon, WalletIcon,DeleteIcon } fro
 import { deleteClientDb } from './funcs';
 import { useDispatch, useSelector } from 'react-redux';
 import { setClient,deleteClient } from '../../redux/reducers/clients';
+import { RoundPhoneAndroid,EmailIcon,LocationIcon,Wallet03  } from '../../components/Icons';
+
 
 export const ClientCard = () => {
 
@@ -23,6 +25,10 @@ export const ClientCard = () => {
    
     const navigate = useNavigate()
   
+
+    const information = useSelector((state) =>{return state.information});
+
+
     useEffect(() => {
   
     
@@ -80,19 +86,48 @@ export const ClientCard = () => {
         {/* Divider */}
         <div className="my-4 border-t border-gray-200"></div>
         <h3 className='text-center text-lg'> Informacion</h3>
-  
-       {/*  <p>
-          nombre y apellido : {client.name + " " + client.lastname}
-        </p>
-        <p>
-          telefono : {client.phone}
-        </p>
-        <p>
-          email : {client.email}
-        </p>
-        <p>
-          direccion : {client.address}
+            
+        {/*  <p className='flex  justify-between '>
+          
+          <span>nombre y apellido </span>
+          
+           <span>{client.name + " " + client.lastname}</span>
         </p> */}
+        <p className='flex justify-between p-1'>
+           
+          <span className='flex flex-row items-center gap-2'>
+          <RoundPhoneAndroid className='w-8 h-8 p-2 rounded-full bg-blue-500 text-white'></RoundPhoneAndroid>
+            telefono</span>
+          <span className='flex flex-row items-center'>{information.contactInformation.phonenumber}</span>
+        </p>
+        <p className='flex justify-between p-1'>
+           
+          <span className='flex flex-row items-center gap-2'>
+          <EmailIcon className='w-8 h-8 p-2 rounded-full bg-blue-500 text-white'></EmailIcon>
+            email</span>
+          <span className='flex flex-row items-center'>{information.contactInformation.email}</span>
+        </p>
+        <p className='flex justify-between p-1'> 
+          <span className='flex flex-row items-center gap-2'>
+          <LocationIcon className='w-8 h-8 p-2 rounded-full bg-blue-500 text-white'></LocationIcon>
+            direccion</span>
+          <span className='flex flex-row items-center'>{information.basicInformation.address}</span>
+        </p> 
+
+        <p className='flex justify-between p-1'> 
+          <span className='flex flex-row items-center gap-2'>
+          <Wallet03 className='w-8 h-8 p-2 rounded-full bg-blue-500 text-white'></Wallet03>
+            cbu</span>
+          <span className='flex flex-row items-center'>{information.financialInformation.cbu}</span>
+        </p> 
+
+        <p className='flex justify-between p-1'> 
+
+          <span className='flex flex-row items-center gap-2'>
+          <Wallet03 className='w-8 h-8 p-2 rounded-full bg-blue-500 text-white'></Wallet03>
+            alias</span>
+          <span className='flex  items-center'>{information.financialInformation.alias}</span>
+        </p> 
   
         <div className="my-4 border-t border-gray-200"></div>
         {/* Rating Section 
@@ -106,7 +141,7 @@ export const ClientCard = () => {
               ))}
           </div>
         </div>*/}
-        <div className="flex items-center justify-between">
+      {/*   <div className="flex items-center justify-between">
           <p className="text-sm font-medium text-gray-700">Rating:</p>
           <div className="flex">
             {Array(5)
@@ -115,7 +150,7 @@ export const ClientCard = () => {
                 <StarIcon key={i} filled={i < 5} />
               ))}
           </div>
-        </div>
+        </div> */}
   
         {/* Action Button */}
         <div className="text-center">

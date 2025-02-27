@@ -20,41 +20,60 @@ import { useDispatch, useSelector } from 'react-redux';
 import {setClient,setNetGains,setBruteGains} from '../../redux/reducers/clients'
 import {setLoans,setTotalLoans} from '../../redux/reducers/loans'
 
-import { getClient,getClientGains,getClientLoans,getClientPaymentsCount } from './funcs';
+import { getClient,getClientGains,getClientLoans,getClientPaymentsCount,getClientNotes,getClientInformation } from './funcs';
 import { formatAmount } from '../../common/funcs';
 
+import {setInformation,setContactInformation,setFinancialInformation,setBasicInformation} from '../../redux/reducers/information'
+import {setPaymentsCount} from '../../redux/reducers/payments'
 
 const Client = () => {
 
-
+  //hooks
   const dispatch = useDispatch()
+  const { showNotification } = useNotification()
+  const navigate = useNavigate()
+  const { id } = useParams();
+
+
+  //Clients
   const client = useSelector((state) => state.client);
+
+  //Loans
   const loans = useSelector((state) => state.loans);
   const totalLoans = useSelector((state) => state.loans.totalLoans)
-  const { showNotification } = useNotification()
+
+  //Gains
   const netGains = useSelector((state) => state.clients.netGains)
   const bruteGains = useSelector((state) => state.clients.bruteGains)
-  const navigate = useNavigate()
 
-  // navigate("/")
-  const { id } = useParams();
- 
-  
+
+  //Information
+  const information = useSelector((state) => state.information);
+
   const [expiredPayments, setExpiredPayments2] = useState(0)
+
+  //Pagination
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(6);
   const [search, setSearch] = useState("");
   const [totalPages, setTotalPages] = useState(1);
   const [filter, setFilter] = useState('')
-  const [paymentsCount, setPaymentsCount] = useState({
+
+
+
+  const paymentsCount = useSelector((state) => state.payments.paymentsCount)
+  //Payments
+  /* const [paymentsCount, setPaymentsCount] = useState({
     pending:0,
     paid:0,
     expired:0
   })
 
+ */
   useEffect(() => {
     const init = async () => {
 
+      //Get Client
     const data =await getClient(id)
     console.log("data:----------------------------->",data)
 
@@ -67,9 +86,39 @@ const Client = () => {
      
     })
 
+    //Get Information
+    const _information = await getClientInformation(id)
+    console.log("information:----------------------------->",_information)
+    //dispatch(setInformation(information))
+   if(_information!==undefined){
+    dispatch(setContactInformation({
+      email:_information.email ? _information.email:'',
+      phonenumber:_information.phone ? _information.phone:'',
+    }))
+
+    dispatch(setFinancialInformation({
+      cbu:_information.cbu ? _information.cbu : '',
+      alias : _information.alias ? _information.alias : ''
+    })) 
+
+    dispatch(setBasicInformation({
+      name:_information.name ? _information.name : '',
+      lastname:_information.lastname ? _information.lastname : ''
+    }))
+    
+  }
+
+
+    //Get Notes
+    const notes = await getClientNotes(id)
+    console.log("notes:----------------------------->",notes)
+//dispatch(setNotes(notes))
+
+
+    //Get Payments Count
     const paymentsCount = await getClientPaymentsCount(id)
     console.log("COUNTpayments:----------------------------->",paymentsCount)
-    setPaymentsCount(paymentsCount)
+    dispatch(setPaymentsCount(paymentsCount))
 
     console.log("fetchLoans:----------------------------->",fetchLoans)
     dispatch(setLoans(fetchLoans.loans))
@@ -77,6 +126,7 @@ const Client = () => {
 
     console.log("loans:----------------------------->",totalLoans)
 
+    //Get Gains
     const gains = await getClientGains(id)
     console.log("gains:----------------------------->",gains)
     dispatch(setNetGains(gains.net_amount))
@@ -155,7 +205,7 @@ const Client = () => {
 
             <AddLoanModal clientId={id} setLoans={setLoans} ></AddLoanModal>
           </div>
-          <div className="flex justify-between col-span-12 xl:col-span-12 bg-white p-5">
+          <div className="flex justify-between col-span-12 xl:col-span-12 bg-white p-1">
             <Select className=""
               onChange={async (e) => setFilter(e.target.value)}
               options={[{
@@ -215,16 +265,19 @@ const Client = () => {
 
 
 import './chart.css'
-const ApexChart = ({paymentsCount}) => {
-  console.log("paymentsCount:----------------------------->",paymentsCount)
-  const {pending,expired,paid} = paymentsCount
+
+const ApexChart = () => {
+
+  const paymentsCount = useSelector((state) => state.payments.paymentsCount)
+  const {pending,expired,paid,incomplete} = paymentsCount
   console.log("pending:----------------------------->",pending)
   console.log("expired:----------------------------->",expired)
   console.log("paid:----------------------------->",paid)
+  console.log("incomplete:----------------------------->",incomplete)
 
   const [state, setState] = React.useState({
-    series: [0,0,0],  // Datos: Pendientes, Vencidos, Pagados
-    labels: ['Pendientes '+pending, 'Vencidos '+expired, 'Pagados '+paid],  // Etiquetas personalizadas
+    series: [0,0,0,0],  // Datos: Pendientes, Vencidos, Pagados
+    labels: [],  // Etiquetas personalizadas
 
     options: {
       chart: {
@@ -256,8 +309,7 @@ const ApexChart = ({paymentsCount}) => {
           }
         }
       },
-      labels: ['Pendientes',  'Pagados','Vencidos'],  // Aquí aseguramos que los labels se configuren correctamente
-      colors: ['rgba(0,143,251,1)', '#4CAF50','#FF5733', ],  // Primer, segundo y tercer color (Pendientes, Vencidos, Pagados)
+      // Primer, segundo y tercer color (Pendientes, Vencidos, Pagados)
       responsive: [
         {
           breakpoint: 480,  // Ajuste para pantallas más pequeñas
@@ -279,10 +331,30 @@ const ApexChart = ({paymentsCount}) => {
   });
 
   useEffect(() => {
+
+    const {pending,expired,paid,incomplete} = paymentsCount
+    if(pending>0 || expired>0 || paid>0 || incomplete>0){
     setState({
       ...state,
-      series: [pending,paid, expired, ],
+      options:{
+        ...state.options,
+        labels: ['Pendientes '+pending,  'Pagados '+paid,'Vencidos '+expired,'Incompletos '+incomplete  ],  // Aquí aseguramos que los labels se configuren correctamente
+      colors: ['rgba(0,143,251,1)', '#4CAF50','#FF5733', '#FFC107'],
+      },
+      series: [pending,paid, expired, incomplete],
     })
+  }else{
+    setState({
+      ...state,
+      options:{
+        ...state.options,
+        labels: ['No hay pagos'],
+        colors: ['#000000'],
+      },
+      series: [1],
+    })
+
+  }
   }, [pending, expired, paid])
   return (
     <div className="chart-card" style={{ width: '100%', height: '200px' }}>  {/* Contenedor pequeño */}

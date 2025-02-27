@@ -19,10 +19,10 @@ const Modal = ({ buttonLabel, children, title,button=false,level=1 }) => {
 
         <ModalButton buttonLabel={buttonLabel} button={button}></ModalButton>
       
-        {isOpen && ( <div className={`flex justify-center items-center h-screen z-${1000*level}`}>
+        {isOpen && ( <div className={`flex justify-center items-center h-screen `}>
        
           
-          <div className="fixed inset-0 z-1000 bg-black bg-opacity-50 flex items-center justify-center z-1000">
+          <div className="fixed inset-0 z-999999 bg-black bg-opacity-50 flex items-center justify-center ">
             <div className="bg-white rounded-lg shadow-lg max-h-screen overflow-auto max-w-lg w-full p-6">
               {/* Cabecera */}
               <div className="flex justify-between items-center border-b pb-3">

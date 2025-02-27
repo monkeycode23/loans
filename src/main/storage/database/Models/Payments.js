@@ -21,6 +21,11 @@ class Payments extends Models{
     FOREIGN KEY (loan_id) REFERENCES loans(id) ON DELETE CASCADE,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
         `); 
+ 
+
+         
+    //this.db.runQuery(`ALTER TABLE payments ADD COLUMN payment_method TEXT`)
+
   }
 
  

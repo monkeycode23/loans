@@ -3,7 +3,7 @@ import PaymentListItem from "./PaymentListItem";
 import Pagination from "../../components/Pagination";
 import { formatAmount } from "../../common/funcs";
 import { useSelector,useDispatch } from "react-redux";
-import {setPage,setSearch} from "../../redux/reducers/Pagination.jsx"
+import {setPage,setSearch} from "../../redux/reducers/_pagination"
 
 const PaymentList = ({date}) => 
 {
@@ -45,14 +45,11 @@ const PaymentList = ({date}) =>
 
       </h3>
       <div className="  text-md font-semibold p-4 flex justify-between items-center">
-        
-        <h3>Lista de Cobranzas</h3>
-        
-        
+         
         <input
                 type="text"
-                placeholder="Buscar..."
-                className=" h-10  p-2 border border-gray-300 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                placeholder="Buscar por nombre..."
+                className="w-3/5 h-10  p-2 border border-gray-300 rounded-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 value={pagination.search}
                 onChange={async(e) => {
 
@@ -64,8 +61,12 @@ const PaymentList = ({date}) =>
 
                 }}
               />
+
+              <div className="w-2/5">
+              <Pagination currentPage={pagination.page} totalPages={pagination.totalPages} changePage={changePage}></Pagination>
+
+              </div>
         
-         <Pagination currentPage={pagination.page} totalPages={pagination.totalPages} changePage={changePage}></Pagination>
       </div>
   
      {payments.map((payment) => (

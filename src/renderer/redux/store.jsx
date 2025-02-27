@@ -4,8 +4,11 @@ import authReducer from './reducers/auth';
 import clientsReducer from './reducers/clients';
 import loansReducer from './reducers/loans';
 import paymentsReducer from './reducers/payments';
-import paginationReducer from './reducers/Pagination';
+import paginationReducer from './reducers/_pagination';
 import gainsReducer from './reducers/gains';
+import dashboardReducer from './reducers/dashboard';
+import informationReducer from './reducers/information';
+import notesReducer from './reducers/notes';
 const rootReducer = {
     users: usersReducer,
     auth: authReducer,  
@@ -14,6 +17,9 @@ const rootReducer = {
     payments: paymentsReducer,
     pagination: paginationReducer,
     gains: gainsReducer,
+    dashboard: dashboardReducer,
+    information: informationReducer,
+    notes: notesReducer,
 };
 
 export const store = configureStore({   

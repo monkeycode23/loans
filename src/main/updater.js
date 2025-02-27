@@ -4,10 +4,10 @@ const logger = require('./logger');
 
 function checkForUpdates() {
     // Solo ejecutar el actualizador si la app está empaquetada
-    if (!app.isPackaged) {
+   /*  if (!app.isPackaged) {
       logger.info('Saltando verificación de actualizaciones en modo desarrollo');
       return;
-    }
+    } */
   
     try {
       autoUpdater.logger = logger;

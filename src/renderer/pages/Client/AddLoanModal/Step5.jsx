@@ -5,6 +5,7 @@ import { useGuide } from "../../../components/GuidedForm/GuidedForm";
 import { createPayments,insertLoan } from "../funcs";
 import { useDispatch,useSelector } from "react-redux";
 import { addLoan } from "../../../redux/reducers/loans";
+import {setPaymentsCount} from "../../../redux/reducers/payments"
 
 const Step5 = ({ setLoans }) => {
     const [notifications, setNotifications] = useState([]);
@@ -14,7 +15,7 @@ const Step5 = ({ setLoans }) => {
    const dispatch = useDispatch()
    const client = useSelector((state) => state.clients.client)
    const {id} = client
-
+   const paymentsCount = useSelector((state) => state.payments.paymentsCount)
    const installments = new Array(Number(formData.installments.value)).fill(0);
    const [pDates, setPDates] = useState(installments.map((e, i) => new Date()))
  
@@ -68,6 +69,10 @@ const Step5 = ({ setLoans }) => {
           console.log("loan:----------------------------->",loan)
           dispatch(addLoan(loan))
           console.log("payments:----------------------------->",payments)
+          dispatch(setPaymentsCount({
+            ...paymentsCount,
+            pending:formData.installments.value,
+          }))
          /*  */
 
       /*      */

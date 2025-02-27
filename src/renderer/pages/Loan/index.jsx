@@ -71,6 +71,8 @@ const Loan = () => {
         const total = await getTotalPayments(id,filter)
         dispatch(setTotalPayments(total))
 
+        
+
         console.log("totalPayments---a>>",payments.total)
         setTotalPages(Math.ceil(payments.total / limit))
 
